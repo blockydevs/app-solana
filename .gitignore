@@ -1,0 +1,19 @@
+build
+bin
+debug
+dep
+obj
+dev-env
+.idea
+.vscode
+gitignore
+.vagrant
+libsol/target
+
+# Python
+__pycache__
+.egg
+.pyc
+*~
+
+tests/python/snapshots-tmp/
