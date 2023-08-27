@@ -95,6 +95,7 @@ endif
 
 DEBUG = 0
 ifneq ($(DEBUG),0)
+$(info "DEBUG ENABLED")
     DEFINES += HAVE_PRINTF
     ifeq ($(TARGET_NAME),TARGET_NANOS)
         DEFINES += PRINTF=screen_printf
@@ -120,10 +121,12 @@ $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 CC      := $(CLANGPATH)clang
-CFLAGS  += -O3 -Os
+#CFLAGS  += -O3 -Os
+CFLAGS  += -O0 -g
 AS      := $(GCCPATH)arm-none-eabi-gcc
 LD      := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os
+#LDFLAGS += -O3 -Os
+LDFLAGS += -O0
 LDLIBS  += -lm -lgcc -lc
 
 include $(BOLOS_SDK)/Makefile.glyphs
