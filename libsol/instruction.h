@@ -17,6 +17,7 @@ enum ProgramId {
     ProgramIdSplAssociatedTokenAccount,
     ProgramIdSplMemo,
     ProgramIdSerumAssertOwner,
+    ProgramIdComputeBudget
 };
 
 typedef struct InstructionInfo {

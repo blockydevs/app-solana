@@ -35,6 +35,16 @@ int process_message_body(const uint8_t* message_body,
         BAIL_IF(parse_instruction(&parser, &instruction));
         BAIL_IF(instruction_validate(&instruction, header));
 
+        /*
+         * export type ComputeBudgetInstructionType =
+            0 | 'RequestUnits'
+            1 | 'RequestHeapFrame'
+            2 | 'SetComputeUnitLimit'
+            3 | 'SetComputeUnitPrice'; = priority fee
+         */
+
+
+
         InstructionInfo* info = &instruction_info[instruction_count];
         enum ProgramId program_id = instruction_program_id(&instruction, header);
         switch (program_id) {
