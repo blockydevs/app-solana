@@ -44,6 +44,7 @@ typedef struct InstructionBrief {
         enum SystemInstructionKind system;
         enum StakeInstructionKind stake;
         enum VoteInstructionKind vote;
+        enum ComputeBudgetInstructionKind compute_budget;
     };
 } InstructionBrief;
 

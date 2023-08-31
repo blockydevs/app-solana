@@ -38,6 +38,4 @@ typedef struct ComputeBudgetInfo {
     };
 } ComputeBudgetInfo;
 
-int parse_compute_budget_instructions(const Instruction* instruction,
-                                      const MessageHeader* header,
-                                      ComputeBudgetInfo* info);
+int parse_compute_budget_instructions(const Instruction* instruction, ComputeBudgetInfo* info);

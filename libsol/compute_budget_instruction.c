@@ -1,5 +1,4 @@
 #include "common_byte_strings.h"
-#include "instruction.h"
 #include "sol/parser.h"
 #include "compute_budget_instruction.h"
 #include "util.h"
@@ -48,16 +47,8 @@ static int parse_unit_price_instruction(Parser* parse, ComputeBudgetChangeUnitPr
     return 0;
 }
 
-int parse_compute_budget_instructions(const Instruction* instruction,
-                                      const MessageHeader* header,
-                                      ComputeBudgetInfo* info) {
+int parse_compute_budget_instructions(const Instruction* instruction, ComputeBudgetInfo* info) {
     Parser parser = {instruction->data, instruction->data_length};
-
-    /*
-     * * change SystemInfo to ComputeBudget Info
-     * * set instruction kind into info var
-     * * header not needed ;)
-     */
 
     BAIL_IF(parse_compute_budget_instruction_kind(&parser, &info->kind));
 

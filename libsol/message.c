@@ -1,5 +1,4 @@
 #include "instruction.h"
-#include "serum_assert_owner_instruction.h"
 #include "sol/parser.h"
 #include "sol/message.h"
 #include "sol/print_config.h"
@@ -81,7 +80,7 @@ int process_message_body(const uint8_t* message_body,
                 break;
             }
             case ProgramIdComputeBudget: {
-                if (parse_compute_budget_instructions(&instruction, header, &info->compute_budget) == 0) {
+                if (parse_compute_budget_instructions(&instruction, &info->compute_budget) == 0) {
                     info->kind = program_id;
                 }
                 break;
@@ -101,7 +100,7 @@ int process_message_body(const uint8_t* message_body,
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
-            case ProgramIdComputeBudget://Additional info on screen not needed
+            case ProgramIdComputeBudget:  // Additional info on screen not needed
                 break;
         }
     }
