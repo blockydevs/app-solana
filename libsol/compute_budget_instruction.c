@@ -3,7 +3,6 @@
 #include "sol/parser.h"
 #include "compute_budget_instruction.h"
 #include "util.h"
-#include <string.h>
 
 const Pubkey compute_budget_program_id = {{PROGRAM_ID_COMPUTE_BUDGET}};
 
@@ -28,9 +27,7 @@ int parse_compute_budget_instructions(const Instruction* instruction,
 
     enum ComputeBudgetInstructionKind tmpKind;
 
-    parse_compute_budget_instruction_kind(&parser, &tmpKind);
-
-    PRINTF("Kind: %d", tmpKind);
+    BAIL_IF(parse_compute_budget_instruction_kind(&parser, &tmpKind));
 
     return 0;
 }
