@@ -35,15 +35,6 @@ int process_message_body(const uint8_t* message_body,
         Instruction instruction;
         BAIL_IF(parse_instruction(&parser, &instruction));
         BAIL_IF(instruction_validate(&instruction, header));
-
-        /*
-         * export type ComputeBudgetInstructionType =
-            0 | 'RequestUnits'
-            1 | 'RequestHeapFrame'
-            2 | 'SetComputeUnitLimit'
-            3 | 'SetComputeUnitPrice'; = priority fee
-         */
-
         InstructionInfo* info = &instruction_info[instruction_count];
         enum ProgramId program_id = instruction_program_id(&instruction, header);
         switch (program_id) {
@@ -90,7 +81,7 @@ int process_message_body(const uint8_t* message_body,
                 break;
             }
             case ProgramIdComputeBudget: {
-                if (parse_compute_budget_instructions(&instruction, header, NULL) == 0) {
+                if (parse_compute_budget_instructions(&instruction, header, &info->compute_budget) == 0) {
                     info->kind = program_id;
                 }
                 break;
@@ -110,7 +101,7 @@ int process_message_body(const uint8_t* message_body,
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
-            case ProgramIdComputeBudget:
+            case ProgramIdComputeBudget://Additional info on screen not needed
                 break;
         }
     }
