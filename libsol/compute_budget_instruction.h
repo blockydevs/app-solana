@@ -5,19 +5,37 @@
 extern const Pubkey compute_budget_program_id;
 
 enum ComputeBudgetInstructionKind {
-    ComputeBudgetChangeUnitLimit = 2,
+    ComputeBudgetRequestUnits = 0,
+    ComputeBudgetRequestHeapFrame,
+    ComputeBudgetChangeUnitLimit,
     ComputeBudgetChangeUnitPrice
 };
 
-typedef struct ComputeBudgetUnitLimit {
-    uint32_t lamports;
-} ComputeBudgetUnitLimit;
+typedef struct ComputeBudgetRequestUnitsInfo {
+    uint32_t units;
+    uint32_t additional_fee;
+} ComputeBudgetRequestUnitsInfo;
 
-typedef struct ComputeBudgetUnitPrice {
-    uint32_t lamports;
-} ComputeBudgetUnitPrice;
+typedef struct ComputeBudgetRequestHeapFrameInfo {
+    uint32_t bytes;
+} ComputeBudgetRequestHeapFrameInfo;
 
+typedef struct ComputeBudgetChangeUnitLimitInfo {
+    uint32_t units;
+} ComputeBudgetChangeUnitLimitInfo;
 
-int parse_compute_budget_instructions(const Instruction* instruction, const MessageHeader* header, SystemInfo* info);
+typedef struct ComputeBudgetChangeUnitPriceInfo {
+    uint32_t units;
+} ComputeBudgetChangeUnitPriceInfo;
 
+typedef struct ComputeBudgetInfo {
+    enum ComputeBudgetInstructionKind kind;
+    union {
+        ComputeBudgetRequestUnitsInfo request_units;
+        ComputeBudgetRequestHeapFrameInfo request_heap_frame;
+        ComputeBudgetChangeUnitLimitInfo change_unit_limit;
+        ComputeBudgetChangeUnitPriceInfo change_unit_price;
+    };
+} ComputeBudgetInfo;
 
+int parse_compute_budget_instructions(const Instruction* instruction, ComputeBudgetInfo* info);
