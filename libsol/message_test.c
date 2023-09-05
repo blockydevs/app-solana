@@ -1,7 +1,7 @@
 #include "common_byte_strings.h"
 #include "message.c"
-#include "sol/parser.h"
-#include "sol/transaction_summary.h"
+#include "include/sol/parser.h"
+#include "include/sol/transaction_summary.h"
 #include "util.h"
 #include <assert.h>
 #include <stdio.h>
@@ -146,6 +146,14 @@ static void process_message_body_and_sanity_check(const uint8_t* message, size_t
         assert(transaction_summary_display_item(i, DisplayFlagNone) == 0);
     }
 }
+
+void test_process_message_body_transfer_with_compute_budget_limit(){
+    uint8_t message[] = {};//@TODO xd
+
+    process_message_body_and_sanity_check(message, sizeof(message), 13);
+
+}
+
 
 void test_process_message_body_nonced_stake_create_with_seed() {
     uint8_t message[] = {

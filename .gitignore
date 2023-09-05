@@ -19,3 +19,7 @@ __pycache__
 tests/python/snapshots-tmp/
 
 .DS_Store
+
+libsol/target
+/*.html
+/*.css

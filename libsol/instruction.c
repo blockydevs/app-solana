@@ -49,7 +49,7 @@ bool instruction_info_matches_brief(const InstructionInfo* info, const Instructi
             case ProgramIdSplMemo:
                 return true;
             case ProgramIdComputeBudget:
-                return true;
+                return (brief->compute_budget == info->compute_budget.kind);
             case ProgramIdSplToken:
                 return (brief->spl_token == info->spl_token.kind);
             case ProgramIdStake:
