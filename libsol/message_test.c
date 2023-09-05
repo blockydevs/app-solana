@@ -148,7 +148,7 @@ static void process_message_body_and_sanity_check(const uint8_t* message, size_t
 }
 
 void test_process_message_body_transfer_with_compute_budget_limit(){
-    uint8_t message[] = {};//@TODO xd
+    uint8_t message[] = {0};//@TODO xd
 
     process_message_body_and_sanity_check(message, sizeof(message), 13);
 
