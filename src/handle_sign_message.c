@@ -66,11 +66,7 @@ void handle_sign_message_parse_message(volatile unsigned int *tx) {
 
     // Set the transaction summary
     transaction_summary_reset();
-    //@TODO changes in message body processing required
     if (process_message_body(parser.buffer, parser.buffer_length, &print_config) != 0) {
-        // Message not processed, throw if blind signing is not enabled
-        //@TODO change it so blind signing is not mandatory
-        //================================================================
         if (N_storage.settings.allow_blind_sign == BlindSignEnabled) {
             SummaryItem *item = transaction_summary_primary_item();
             summary_item_set_string(item, "Unrecognized", "format");
