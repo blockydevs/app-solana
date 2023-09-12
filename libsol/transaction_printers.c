@@ -552,6 +552,7 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                         print_config);
                 case ProgramIdSerumAssertOwner:
                 case ProgramIdSplMemo:
+                case ProgramIdComputeBudget:
                 case ProgramIdUnknown:
                     break;
             }
