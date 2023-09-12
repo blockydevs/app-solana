@@ -10,6 +10,7 @@
 #include "vote_instruction.h"
 #include "transaction_printers.h"
 #include "util.h"
+#include "compute_budget_instruction.h"
 #include <string.h>
 
 #define MAX_INSTRUCTIONS 4
@@ -80,6 +81,12 @@ int process_message_body(const uint8_t* message_body,
                 }
                 break;
             }
+            case ProgramIdComputeBudget: {
+                if (parse_compute_budget_instructions(&instruction, &info->compute_budget) == 0) {
+                    info->kind = program_id;
+                }
+                break;
+            }
             case ProgramIdUnknown:
                 break;
         }
@@ -95,6 +102,8 @@ int process_message_body(const uint8_t* message_body,
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
+            // Additional info on screen not needed
+            case ProgramIdComputeBudget:
                 break;
         }
     }
