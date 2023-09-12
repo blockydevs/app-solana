@@ -1,10 +1,12 @@
-from typing import List
 from enum import IntEnum
+from typing import List
+
 import base58
 from nacl.signing import VerifyKey
 
-
 PROGRAM_ID_SYSTEM = "11111111111111111111111111111111"
+
+PROGRAM_ID_COMPUTE_BUDGET = "ComputeBudget111111111111111111111111111111"
 
 # Fake blockhash so this example doesn't need a network connection. It should be queried from the cluster in normal use.
 FAKE_RECENT_BLOCKHASH = "11111111111111111111111111111111"
@@ -15,6 +17,12 @@ def verify_signature(from_public_key: bytes, message: bytes, signature: bytes):
     verify_key = VerifyKey(from_public_key)
     verify_key.verify(message, signature)
 
+
+class ComputeBudgetInstruction(IntEnum):
+    RequestUnits        = 0x00
+    RequestHeapFrame    = 0x01
+    SetComputeUnitLimit = 0x02
+    SetComputeUnitPrice = 0x03
 
 class SystemInstruction(IntEnum):
     CreateAccount           = 0x00
@@ -61,6 +69,37 @@ class Instruction:
     from_pubkey: bytes
     to_pubkey: bytes
 
+
+class ComputeBudgetInstructionRequestUnits(Instruction):
+    def __init__(self, units: int, additionalFee: int):
+        self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
+        self.accounts = []
+        self.data = ((ComputeBudgetInstruction.RequestUnits).to_bytes(1, byteorder='little')
+                     + (additionalFee).to_bytes(4, byteorder='little')
+                     + (units).to_bytes(4, byteorder='little'))
+
+
+class ComputeBudgetRequestHeapFrame(Instruction):
+    def __init__(self, bytes: int):
+        self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
+        self.accounts = []
+        self.data = (ComputeBudgetInstruction.RequestHeapFrame).to_bytes(1, byteorder='little') + (bytes).to_bytes(4, byteorder='little')
+
+
+class ComputeBudgetInstructionUnitLimit(Instruction):
+    def __init__(self, lamports_amount: int):
+        self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
+        self.accounts = []
+        self.data = (ComputeBudgetInstruction.SetComputeUnitLimit).to_bytes(1, byteorder='little') + (lamports_amount).to_bytes(4, byteorder='little')
+
+
+class ComputeBudgetSetComputeUnitPrice(Instruction):
+    def __init__(self, lamports_amount: int):
+        self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
+        self.accounts = []
+        self.data = (ComputeBudgetInstruction.SetComputeUnitLimit).to_bytes(1, byteorder='little') + (lamports_amount).to_bytes(4, byteorder='little')
+
+
 class SystemInstructionTransfer(Instruction):
     def __init__(self, from_pubkey: bytes, to_pubkey: bytes, amount: int):
         self.from_pubkey = from_pubkey
@@ -68,6 +107,7 @@ class SystemInstructionTransfer(Instruction):
         self.program_id = base58.b58decode(PROGRAM_ID_SYSTEM)
         self.accounts = [AccountMeta(from_pubkey, True, True), AccountMeta(to_pubkey, False, True)]
         self.data = (SystemInstruction.Transfer).to_bytes(4, byteorder='little') + (amount).to_bytes(8, byteorder='little')
+
 
 # Cheat as we only support 1 SystemInstructionTransfer currently
 # TODO add support for multiple transfers and other instructions if the needs arises
