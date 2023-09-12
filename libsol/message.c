@@ -1,5 +1,4 @@
 #include "instruction.h"
-#include "serum_assert_owner_instruction.h"
 #include "sol/parser.h"
 #include "sol/message.h"
 #include "sol/print_config.h"
@@ -10,6 +9,7 @@
 #include "vote_instruction.h"
 #include "transaction_printers.h"
 #include "util.h"
+#include "compute_budget_instruction.h"
 #include <string.h>
 
 #define MAX_INSTRUCTIONS 4
@@ -34,7 +34,6 @@ int process_message_body(const uint8_t* message_body,
         Instruction instruction;
         BAIL_IF(parse_instruction(&parser, &instruction));
         BAIL_IF(instruction_validate(&instruction, header));
-
         InstructionInfo* info = &instruction_info[instruction_count];
         enum ProgramId program_id = instruction_program_id(&instruction, header);
         switch (program_id) {
@@ -80,6 +79,12 @@ int process_message_body(const uint8_t* message_body,
                 }
                 break;
             }
+            case ProgramIdComputeBudget: {
+                if (parse_compute_budget_instructions(&instruction, &info->compute_budget) == 0) {
+                    info->kind = program_id;
+                }
+                break;
+            }
             case ProgramIdUnknown:
                 break;
         }
@@ -95,6 +100,7 @@ int process_message_body(const uint8_t* message_body,
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
+            case ProgramIdComputeBudget:  // Additional info on screen not needed
                 break;
         }
     }
