@@ -18,8 +18,8 @@
 ifeq ($(BOLOS_SDK),)
     # `THIS_DIR` must be resolved BEFORE any `include` directives
     THIS_DIR   := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-	TARGET_SDK := $(shell ./util/read-last-sdk)
-	BOLOS_SDK  := ${$(TARGET_SDK)}
+		TARGET_SDK := $(shell ./util/read-last-sdk)
+		BOLOS_SDK  := ${$(TARGET_SDK)}
 endif
 
 ifeq ($(BOLOS_SDK),)
@@ -29,10 +29,10 @@ endif
 include $(BOLOS_SDK)/Makefile.defines
 
 APP_LOAD_PARAMS = --curve ed25519
-ifeq ($(TARGET_NAME), TARGET_NANOS)
-APP_LOAD_PARAMS += --appFlags 0x800 # APPLICATION_FLAG_LIBRARY
-else
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
 APP_LOAD_PARAMS += --appFlags 0xa00 # APPLICATION_FLAG_LIBRARY + APPLICATION_FLAG_BOLOS_SETTINGS
+else
+APP_LOAD_PARAMS += --appFlags 0x800 # APPLICATION_FLAG_LIBRARY
 endif
 APP_LOAD_PARAMS += --path "44'/501'"
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
@@ -95,7 +95,6 @@ endif
 
 DEBUG = 0
 ifneq ($(DEBUG),0)
-$(info "DEBUG ENABLED")
     DEFINES += HAVE_PRINTF
     ifeq ($(TARGET_NAME),TARGET_NANOS)
         DEFINES += PRINTF=screen_printf
@@ -121,12 +120,10 @@ $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 CC      := $(CLANGPATH)clang
-#CFLAGS  += -O3 -Os
-CFLAGS  += -O0 -g
+CFLAGS  += -O3 -Os
 AS      := $(GCCPATH)arm-none-eabi-gcc
 LD      := $(GCCPATH)arm-none-eabi-gcc
-#LDFLAGS += -O3 -Os
-LDFLAGS += -O0
+LDFLAGS += -O3 -Os
 LDLIBS  += -lm -lgcc -lc
 
 include $(BOLOS_SDK)/Makefile.glyphs

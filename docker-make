@@ -13,15 +13,10 @@ source "$here"/util/active-target.sh
 
 last_target_sdk="$(read_last_target_sdk_mnemonic "$here")"
 maybe_target_sdk="$(normalize_mnemonic "${1:-''}" false)"
-
-echo $maybe_target_sdk
-
 if [[ -n "$maybe_target_sdk" ]]; then
   shift
 fi
 target_sdk="${maybe_target_sdk:-"$last_target_sdk"}"
-
-echo $target_sdk
 
 if [[ -z "$target_sdk" ]]; then
   echo 'cannot resolve target sdk. please pass `s`, `x` or `sp` as the first argument' 1>&2
@@ -45,8 +40,4 @@ make ${*}
 chown -fR $owner /app/{bin,debug,dep,libsol/target_sdk,obj,src/glyphs.{c,h}}
 EOF
 
-echo "Docker"
-echo $here
-echo $container_script
-
-#docker run --rm -t --platform=linux/amd64 -v "$here:/app" "ledger-app-builder:$docker_tag" /bin/bash -c "$container_script"
+docker run --rm -t -v "$here:/app" "ledger-app-builder:$docker_tag" /bin/bash -c "$container_script"
