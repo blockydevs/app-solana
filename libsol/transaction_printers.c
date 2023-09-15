@@ -5,6 +5,10 @@
 #include "transaction_printers.h"
 #include "util.h"
 
+#define ADVANCE_INFOS() \
+    infos++;\
+    infos_length--;
+
 const InstructionBrief nonce_brief[] = {
     SYSTEM_IX_BRIEF(SystemAdvanceNonceAccount),
 };
@@ -534,8 +538,8 @@ static int print_spl_associated_token_account_create_with_transfer(const PrintCo
 
 static int print_compute_budget_unit_price(InstructionInfo* info) {
     if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice) {
-        SummaryItem* item = transaction_summary_priority_fees_item();
-        summary_item_set_u64(item, NULL, info->compute_budget.change_unit_price.units);
+        SummaryItemPayload* item_payload = transaction_summary_payload_priority_fees_item();
+        summary_item_payload_set_u64(item_payload, info->compute_budget.change_unit_price.units);
     }
 
     return 0;
@@ -641,16 +645,18 @@ int print_transaction(const PrintConfig* print_config,
         const InstructionInfo* nonce_info = infos[0];
         print_system_nonced_transaction_sentinel(&(nonce_info->system), print_config);
         // offset parameters given to print_transaction_nonce_processed()
-        infos++;
-        infos_length--;
+        ADVANCE_INFOS();
     }
 
     if (infos_length > 1) {
-        // Iterate over infos and print compute budget instructions and offset poiters
+        // Iterate over infos and print compute budget instructions and offset pointers
         for (size_t info_idx = 0; info_idx < infos_length; ++info_idx) {
             InstructionInfo* instruction_info = infos[info_idx];
-            if (infos[info_idx]->kind == ProgramIdComputeBudget) {
+            if (instruction_info->kind == ProgramIdComputeBudget) {
                 print_compute_budget_unit_price(instruction_info);
+                ADVANCE_INFOS();
+                PRINTF("Setting compute budget unit price to %d",
+                       instruction_info->compute_budget.change_unit_price);
             }
         }
     }

@@ -18,6 +18,10 @@ struct SummaryItem {
     };
 };
 
+void summary_item_payload_set_u64(struct SummaryItemPayload* item_payload, uint64_t value) {
+    item_payload->u64 = value;
+}
+
 void summary_item_set_amount(SummaryItem* item, const char* title, uint64_t value) {
     item->kind = SummaryItemAmount;
     item->title = title;
@@ -85,7 +89,7 @@ typedef struct TransactionSummary {
     SummaryItem nonce_account;
     SummaryItem nonce_authority;
     SummaryItem general[NUM_GENERAL_ITEMS];
-    SummaryItem priority_fees;
+    SummaryItemPayload priority_fees;
 } TransactionSummary;
 
 static TransactionSummary G_transaction_summary;
@@ -97,6 +101,10 @@ void transaction_summary_reset() {
     explicit_bzero(&G_transaction_summary, sizeof(TransactionSummary));
     explicit_bzero(&G_transaction_summary_title, TITLE_SIZE);
     explicit_bzero(&G_transaction_summary_text, TEXT_BUFFER_LENGTH);
+}
+
+SummaryItemPayload* transaction_summary_get_priority_fees() {
+    return &G_transaction_summary.priority_fees;
 }
 
 static bool is_summary_item_used(const SummaryItem* item) {
@@ -115,9 +123,8 @@ SummaryItem* transaction_summary_primary_item() {
     return summary_item_as_unused(item);
 }
 
-SummaryItem* transaction_summary_priority_fees_item(){
-    SummaryItem* item = &G_transaction_summary.priority_fees;
-    return summary_item_as_unused(item);
+SummaryItemPayload* transaction_summary_payload_priority_fees_item() {
+    return &G_transaction_summary.priority_fees;
 }
 
 SummaryItem* transaction_summary_fee_payer_item() {

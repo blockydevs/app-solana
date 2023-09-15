@@ -260,8 +260,14 @@ static int print_system_transfer_info(const SystemTransferInfo* info,
     SummaryItem* item;
 
     item = transaction_summary_primary_item();
-    // @TODO Read priority fee from TransactionSummary priority_fees
-    summary_item_set_amount(item, "Transfer", info->lamports);
+
+    SummaryItemPayload* priority_fees = transaction_summary_get_priority_fees();
+
+    //@TODO multiply it by unit price
+    // transaction_summary_reset makes sure that u64 value is 0 by default;
+    uint64_t lamports_total = info->lamports + priority_fees->u64;
+
+    summary_item_set_amount(item, "Transfer", lamports_total);
 
     if (print_config_show_authority(print_config, info->from)) {
         item = transaction_summary_general_item();

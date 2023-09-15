@@ -19,11 +19,12 @@
  * Decides whenever compute budget instruction data should be included on the device's display
  * Currently only priority fee is used
  */
-static void handle_compute_budget_instruction_display(InstructionInfo* display_instruction_info,
+static void handle_compute_budget_instruction_display(InstructionInfo** display_instruction_info,
                                                       size_t* display_instruction_count,
                                                       InstructionInfo* info) {
     if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice) {
-        display_instruction_info[(*display_instruction_count)++] = *info;
+        display_instruction_info[*display_instruction_count] = info;
+        (*display_instruction_count)++;
     }
 }
 
@@ -112,8 +113,10 @@ int process_message_body(const uint8_t* message_body,
                 display_instruction_info[display_instruction_count++] = info;
                 break;
             case ProgramIdComputeBudget:
-                handle_compute_budget_instruction_display(
-                    (InstructionInfo*) display_instruction_info, &display_instruction_count, info);
+                handle_compute_budget_instruction_display(display_instruction_info,
+                                                          &display_instruction_count,
+                                                          info);
+                break;
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
