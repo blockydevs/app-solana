@@ -13,7 +13,19 @@
 #include "compute_budget_instruction.h"
 #include <string.h>
 
-#define MAX_INSTRUCTIONS 4
+#define MAX_INSTRUCTIONS 5
+
+/**
+ * Decides whenever compute budget instruction data should be included on the device's display
+ * Currently only priority fee is used
+ */
+static void handle_compute_budget_instruction_display(InstructionInfo* display_instruction_info,
+                                                      size_t* display_instruction_count,
+                                                      InstructionInfo* info) {
+    if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice) {
+        display_instruction_info[(*display_instruction_count)++] = *info;
+    }
+}
 
 int process_message_body(const uint8_t* message_body,
                          int message_body_length,
@@ -54,7 +66,7 @@ int process_message_body(const uint8_t* message_body,
                 break;
             }
             case ProgramIdSplMemo: {
-                // SPL Memo only has one instruction and we ignore it for now
+                // SPL Memo only has one instruction, and we ignore it for now
                 info->kind = program_id;
                 break;
             }
@@ -99,11 +111,12 @@ int process_message_body(const uint8_t* message_body,
             case ProgramIdUnknown:
                 display_instruction_info[display_instruction_count++] = info;
                 break;
+            case ProgramIdComputeBudget:
+                handle_compute_budget_instruction_display(
+                    (InstructionInfo*) display_instruction_info, &display_instruction_count, info);
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
-            // Additional info on screen not needed
-            case ProgramIdComputeBudget:
                 break;
         }
     }
@@ -117,7 +130,7 @@ int process_message_body(const uint8_t* message_body,
     // Ensure we've consumed the entire message body
     BAIL_IF(!parser_is_empty(&parser));
 
-    // If we don't know about all of the instructions, bail
+    // If we don't know about all the instructions, bail
     for (size_t i = 0; i < instruction_count; i++) {
         BAIL_IF(instruction_info[i].kind == ProgramIdUnknown);
     }

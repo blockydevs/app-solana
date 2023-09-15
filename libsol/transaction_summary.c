@@ -85,6 +85,7 @@ typedef struct TransactionSummary {
     SummaryItem nonce_account;
     SummaryItem nonce_authority;
     SummaryItem general[NUM_GENERAL_ITEMS];
+    SummaryItem priority_fees;
 } TransactionSummary;
 
 static TransactionSummary G_transaction_summary;
@@ -111,6 +112,11 @@ static SummaryItem* summary_item_as_unused(SummaryItem* item) {
 
 SummaryItem* transaction_summary_primary_item() {
     SummaryItem* item = &G_transaction_summary.primary;
+    return summary_item_as_unused(item);
+}
+
+SummaryItem* transaction_summary_priority_fees_item(){
+    SummaryItem* item = &G_transaction_summary.priority_fees;
     return summary_item_as_unused(item);
 }
 

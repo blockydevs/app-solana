@@ -532,6 +532,15 @@ static int print_spl_associated_token_account_create_with_transfer(const PrintCo
     return 0;
 }
 
+static int print_compute_budget_unit_price(InstructionInfo* info) {
+    if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice) {
+        SummaryItem* item = transaction_summary_priority_fees_item();
+        summary_item_set_u64(item, NULL, info->compute_budget.change_unit_price.units);
+    }
+
+    return 0;
+}
+
 static int print_transaction_nonce_processed(const PrintConfig* print_config,
                                              InstructionInfo* const* infos,
                                              size_t infos_length) {
@@ -552,7 +561,8 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                         print_config);
                 case ProgramIdSerumAssertOwner:
                 case ProgramIdSplMemo:
-                case ProgramIdComputeBudget:
+                case ProgramIdComputeBudget:  // If pointers are advanced before, this case wont be
+                                              // needed
                 case ProgramIdUnknown:
                     break;
             }
@@ -633,6 +643,16 @@ int print_transaction(const PrintConfig* print_config,
         // offset parameters given to print_transaction_nonce_processed()
         infos++;
         infos_length--;
+    }
+
+    if (infos_length > 1) {
+        // Iterate over infos and print compute budget instructions and offset poiters
+        for (size_t info_idx = 0; info_idx < infos_length; ++info_idx) {
+            InstructionInfo* instruction_info = infos[info_idx];
+            if (infos[info_idx]->kind == ProgramIdComputeBudget) {
+                print_compute_budget_unit_price(instruction_info);
+            }
+        }
     }
 
     return print_transaction_nonce_processed(print_config, infos, infos_length);

@@ -260,6 +260,7 @@ static int print_system_transfer_info(const SystemTransferInfo* info,
     SummaryItem* item;
 
     item = transaction_summary_primary_item();
+    // @TODO Read priority fee from TransactionSummary priority_fees
     summary_item_set_amount(item, "Transfer", info->lamports);
 
     if (print_config_show_authority(print_config, info->from)) {

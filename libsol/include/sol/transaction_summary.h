@@ -63,6 +63,7 @@ int transaction_summary_display_item(size_t item_index, enum DisplayFlags flags)
 int transaction_summary_finalize(enum SummaryItemKind* item_kinds, size_t* item_kinds_len);
 
 // Get a pointer to the requested SummaryItem. NULL if it has already been set
+SummaryItem* transaction_summary_priority_fees_item();
 SummaryItem* transaction_summary_primary_item();
 SummaryItem* transaction_summary_fee_payer_item();
 SummaryItem* transaction_summary_nonce_account_item();
