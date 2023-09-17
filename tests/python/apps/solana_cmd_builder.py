@@ -160,8 +160,6 @@ class Message:
     def __init__(self, instructions: List[Instruction]):
         self.recent_blockhash = base58.b58decode(FAKE_RECENT_BLOCKHASH)
 
-        print("Starting MSG: instruction len: ", len(instructions))
-
         tmp_num_required_signatures = 0
         tmp_num_readonly_signed_accounts = 0
         tmp_num_readonly_unsigned_accounts = 0
