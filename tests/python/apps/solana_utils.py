@@ -22,7 +22,8 @@ def lamports_to_bytes(lamports: int) -> str:
 
 ### Proposed values for fees and amounts ###
 
-AMOUNT          = sol_to_lamports(2.078)
+# AMOUNT          = sol_to_lamports(2.078)
+AMOUNT          = 1
 AMOUNT_BYTES    = lamports_to_bytes(AMOUNT)
 
 AMOUNT_2        = sol_to_lamports(101.000001234)
@@ -30,6 +31,9 @@ AMOUNT_2_BYTES  = lamports_to_bytes(AMOUNT_2)
 
 FEES            = sol_to_lamports(0.00000564)
 FEES_BYTES      = lamports_to_bytes(FEES)
+
+COMPUTE_BUDGET_UNIT_LIMIT = 43981
+COMPUTE_BUDGET_UNIT_PRICE = 16
 
 
 ### Proposed foreign and owned addresses ###

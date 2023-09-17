@@ -261,11 +261,10 @@ static int print_system_transfer_info(const SystemTransferInfo* info,
 
     item = transaction_summary_primary_item();
 
-    SummaryItemPayload* priority_fees = transaction_summary_get_priority_fees();
+    uint64_t  prioritization_fee = calculate_additional_transaction_fees();
 
-    //@TODO multiply it by unit price
     // transaction_summary_reset makes sure that u64 value is 0 by default;
-    uint64_t lamports_total = info->lamports + priority_fees->u64;
+    uint64_t lamports_total = info->lamports + prioritization_fee;
 
     summary_item_set_amount(item, "Transfer", lamports_total);
 

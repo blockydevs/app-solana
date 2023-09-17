@@ -20,6 +20,8 @@
 // If all _Required_ `SummaryItem`s have not been set, finalization will fail.
 
 #define NUM_GENERAL_ITEMS 11
+#define DEFAULT_COMPUTE_UNIT_LIMIT 200000
+#define COMPUTE_UNIT_PRICE_DIVIDER 1000000
 #define MAX_TRANSACTION_SUMMARY_ITEMS              \
     (1                       /* primary */         \
      + NUM_GENERAL_ITEMS + 1 /* nonce_account */   \
@@ -33,15 +35,6 @@ typedef struct TokenAmount {
     uint8_t decimals;
 } TokenAmount;
 
-// Struct used to transfer data between instruction
-// (e.g. SystemProgram.transfer and ComputeBudget.unitPrice)
-struct SummaryItemPayload {
-    union {
-        uint64_t u64;
-        // Union left for future expansions
-    };
-};
-
 enum SummaryItemKind {
     SummaryItemNone = 0,  // SummaryItemNone always zero
     SummaryItemAmount,
@@ -54,6 +47,17 @@ enum SummaryItemKind {
     SummaryItemString,
     SummaryItemTimestamp,
 };
+
+// Struct used to transfer data between instruction
+// (e.g. SystemProgram.transfer and ComputeBudget.unitPrice)
+struct SummaryItemPayload {
+    enum SummaryItemKind kind;
+    union {
+        uint64_t u64;
+        // Union left for future expansions
+    };
+};
+
 typedef enum SummaryItemKind SummaryItemKind_t;
 
 typedef struct SummaryItem SummaryItem;
@@ -75,13 +79,16 @@ int transaction_summary_finalize(enum SummaryItemKind* item_kinds, size_t* item_
 
 // Get a pointer to the requested SummaryItem. NULL if it has already been set
 SummaryItemPayload* transaction_summary_payload_priority_fees_item();
+SummaryItemPayload* transaction_summary_payload_compute_units_limit_item();
 SummaryItem* transaction_summary_primary_item();
 SummaryItem* transaction_summary_fee_payer_item();
 SummaryItem* transaction_summary_nonce_account_item();
 SummaryItem* transaction_summary_nonce_authority_item();
 SummaryItem* transaction_summary_general_item();
 
-SummaryItemPayload* transaction_summary_get_priority_fees();
+
+uint64_t calculate_additional_transaction_fees();
+
 
 int transaction_summary_set_fee_payer_pubkey(const Pubkey* pubkey);
 

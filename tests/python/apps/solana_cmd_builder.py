@@ -51,6 +51,7 @@ class MessageHeader:
                self.num_readonly_signed_accounts.to_bytes(1, byteorder='little') + \
                self.num_readonly_unsigned_accounts.to_bytes(1, byteorder='little')
 
+
 class AccountMeta:
     pubkey: bytes
     is_signer: bool
@@ -60,6 +61,7 @@ class AccountMeta:
         self.is_signer = is_signer
         self.is_writable = is_writable
 
+
 # Only support Transfer instruction for now
 # TODO add other instructions if the need arises
 class Instruction:
@@ -68,6 +70,9 @@ class Instruction:
     data: bytes
     from_pubkey: bytes
     to_pubkey: bytes
+    num_required_signatures: int
+    num_readonly_signed_accounts: int
+    num_readonly_unsigned_accounts: int
 
 
 class ComputeBudgetInstructionRequestUnits(Instruction):
@@ -88,6 +93,11 @@ class ComputeBudgetRequestHeapFrame(Instruction):
 
 class ComputeBudgetInstructionUnitLimit(Instruction):
     def __init__(self, lamports_amount: int):
+        self.from_pubkey = bytearray()
+        self.to_pubkey = bytearray()
+        self.num_required_signatures = 0
+        self.num_readonly_signed_accounts = 0
+        self.num_readonly_unsigned_accounts = 1
         self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
         self.accounts = []
         self.data = (ComputeBudgetInstruction.SetComputeUnitLimit).to_bytes(1, byteorder='little') + (lamports_amount).to_bytes(4, byteorder='little')
@@ -95,6 +105,11 @@ class ComputeBudgetInstructionUnitLimit(Instruction):
 
 class ComputeBudgetSetComputeUnitPrice(Instruction):
     def __init__(self, lamports_amount: int):
+        self.from_pubkey = bytearray()
+        self.to_pubkey = bytearray()
+        self.num_required_signatures = 0
+        self.num_readonly_signed_accounts = 0
+        self.num_readonly_unsigned_accounts = 1
         self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
         self.accounts = []
         self.data = (ComputeBudgetInstruction.SetComputeUnitLimit).to_bytes(1, byteorder='little') + (lamports_amount).to_bytes(4, byteorder='little')
@@ -102,6 +117,9 @@ class ComputeBudgetSetComputeUnitPrice(Instruction):
 
 class SystemInstructionTransfer(Instruction):
     def __init__(self, from_pubkey: bytes, to_pubkey: bytes, amount: int):
+        self.num_required_signatures = 2
+        self.num_readonly_signed_accounts = 0
+        self.num_readonly_unsigned_accounts = 1
         self.from_pubkey = from_pubkey
         self.to_pubkey = to_pubkey
         self.program_id = base58.b58decode(PROGRAM_ID_SYSTEM)
@@ -125,12 +143,13 @@ class CompiledInstruction:
         serialized: bytes = self.program_id_index.to_bytes(1, byteorder='little')
         serialized += len(self.accounts).to_bytes(1, byteorder='little')
         for account in self.accounts:
-            serialized += (account).to_bytes(1, byteorder='little')
+            serialized += account.to_bytes(1, byteorder='little')
         serialized += len(self.data).to_bytes(1, byteorder='little')
         serialized += self.data
         return serialized
 
-# Solana communication message, header + list of public keys used by the instructions + instructions
+
+# Solana's communication message, header + list of public keys used by the instructions + instructions
 # with references to the keys array
 class Message:
     header: MessageHeader
@@ -138,13 +157,30 @@ class Message:
     recent_blockhash: bytes
     compiled_instructions: List[CompiledInstruction]
 
-    def __init__(self, instructions: List[Instruction]):
-        # Cheat as we only support 1 SystemInstructionTransfer currently
-        # TODO add support for multiple transfers and other instructions if the needs arises
-        self.header = MessageHeader(2, 0, 1)
-        self.account_keys = [instructions[0].from_pubkey, instructions[0].to_pubkey, instructions[0].program_id]
+    def __init__(self, fee_payer: bytes, instructions: List[Instruction]):
         self.recent_blockhash = base58.b58decode(FAKE_RECENT_BLOCKHASH)
-        self.compiled_instructions = [CompiledInstruction(2, [0, 1], instructions[0].data)]
+
+        tmp_num_required_signatures = 0
+        tmp_num_readonly_signed_accounts = 0
+        tmp_num_readonly_unsigned_accounts = 0
+
+        self.account_keys = [fee_payer]
+        self.compiled_instructions = []
+        program_index = 0
+        for instruction in instructions:
+            tmp_num_required_signatures += instruction.num_required_signatures
+            tmp_num_readonly_signed_accounts += instruction.num_readonly_signed_accounts
+            tmp_num_readonly_unsigned_accounts += instruction.num_readonly_unsigned_accounts
+            program_index += (tmp_num_required_signatures + tmp_num_readonly_signed_accounts)
+            accounts_list = list(filter(None, [instruction.from_pubkey, instruction.to_pubkey, instruction.program_id]))
+            tmp_accounts = []
+            if instruction.program_id != base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET):
+                tmp_accounts = [tmp_num_readonly_unsigned_accounts, 1+tmp_num_readonly_unsigned_accounts]
+            self.compiled_instructions += [CompiledInstruction(program_index, tmp_accounts, instruction.data)]
+            program_index += tmp_num_readonly_unsigned_accounts
+            self.account_keys += accounts_list
+
+        self.header = MessageHeader(tmp_num_required_signatures, tmp_num_readonly_signed_accounts, tmp_num_readonly_unsigned_accounts)
 
     def serialize(self) -> bytes:
         serialized: bytes = self.header.serialize()
@@ -153,8 +189,10 @@ class Message:
             serialized += account_key
         serialized += self.recent_blockhash
         serialized += len(self.compiled_instructions).to_bytes(1, byteorder='little')
-        serialized += self.compiled_instructions[0].serialize()
+        for instruction in self.compiled_instructions:
+            serialized += instruction.serialize()
         return serialized
+
 
 def is_printable_ascii(string: str) -> bool:
     try:
@@ -162,6 +200,7 @@ def is_printable_ascii(string: str) -> bool:
         return True
     except UnicodeDecodeError:
         return False
+
 
 def is_utf8(string: str) -> bool:
     return True
@@ -182,10 +221,12 @@ MAX_LEN: int = U16_MAX - BASE_HEADER_LEN - MESSAGE_HEADER_LEN;
 # Max Length of the OffchainMessage supported by the Ledger
 MAX_LEN_LEDGER: int = PACKET_DATA_SIZE - BASE_HEADER_LEN - MESSAGE_HEADER_LEN;
 
+
 class MessageFormat(IntEnum):
     RestrictedAscii = 0x00
     LimitedUtf8     = 0x01
     ExtendedUtf8    = 0x02
+
 
 class v0_OffchainMessage:
     format: MessageFormat

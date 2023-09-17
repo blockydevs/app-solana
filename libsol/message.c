@@ -13,16 +13,16 @@
 #include "compute_budget_instruction.h"
 #include <string.h>
 
-#define MAX_INSTRUCTIONS 5
+#define MAX_INSTRUCTIONS 6
 
 /**
  * Decides whenever compute budget instruction data should be included on the device's display
- * Currently only priority fee is used
+ * Currently only priority fee and unit limit are used
  */
 static void handle_compute_budget_instruction_display(InstructionInfo** display_instruction_info,
                                                       size_t* display_instruction_count,
                                                       InstructionInfo* info) {
-    if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice) {
+    if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice || info->compute_budget.kind == ComputeBudgetChangeUnitLimit) {
         display_instruction_info[*display_instruction_count] = info;
         (*display_instruction_count)++;
     }

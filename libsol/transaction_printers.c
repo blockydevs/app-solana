@@ -537,11 +537,29 @@ static int print_spl_associated_token_account_create_with_transfer(const PrintCo
 }
 
 static int print_compute_budget_unit_price(InstructionInfo* info) {
-    if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice) {
-        SummaryItemPayload* item_payload = transaction_summary_payload_priority_fees_item();
-        summary_item_payload_set_u64(item_payload, info->compute_budget.change_unit_price.units);
-    }
+    SummaryItemPayload* item_payload = transaction_summary_payload_priority_fees_item();
+    summary_item_payload_set_u64(item_payload, info->compute_budget.change_unit_price.units);
+    return 0;
+}
 
+static int print_compute_budget_unit_limit(InstructionInfo* info){
+    SummaryItemPayload* item_payload = transaction_summary_payload_compute_units_limit_item();
+    summary_item_payload_set_u64(item_payload, info->compute_budget.change_unit_limit.units);
+    return 0;
+}
+
+static int print_compute_budget(InstructionInfo* info){
+    switch (info->compute_budget.kind) {
+        case ComputeBudgetChangeUnitLimit:
+            print_compute_budget_unit_limit(info);
+            break;
+        case ComputeBudgetChangeUnitPrice:
+            print_compute_budget_unit_price(info);
+            break;
+        case ComputeBudgetRequestUnits:
+        case ComputeBudgetRequestHeapFrame:
+            break;
+    }
     return 0;
 }
 
@@ -565,8 +583,8 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                         print_config);
                 case ProgramIdSerumAssertOwner:
                 case ProgramIdSplMemo:
-                case ProgramIdComputeBudget:  // If pointers are advanced before, this case wont be
-                                              // needed
+                // If pointers are advanced before, this case won't be needed
+                case ProgramIdComputeBudget:
                 case ProgramIdUnknown:
                     break;
             }
@@ -645,18 +663,17 @@ int print_transaction(const PrintConfig* print_config,
         const InstructionInfo* nonce_info = infos[0];
         print_system_nonced_transaction_sentinel(&(nonce_info->system), print_config);
         // offset parameters given to print_transaction_nonce_processed()
-        ADVANCE_INFOS();
+        ADVANCE_INFOS()
     }
 
     if (infos_length > 1) {
         // Iterate over infos and print compute budget instructions and offset pointers
-        for (size_t info_idx = 0; info_idx < infos_length; ++info_idx) {
-            InstructionInfo* instruction_info = infos[info_idx];
+        size_t infos_length_initial = infos_length;
+        for (size_t info_idx = 0; info_idx < infos_length_initial; ++info_idx) {
+            InstructionInfo* instruction_info = infos[0];
             if (instruction_info->kind == ProgramIdComputeBudget) {
-                print_compute_budget_unit_price(instruction_info);
-                ADVANCE_INFOS();
-                PRINTF("Setting compute budget unit price to %d",
-                       instruction_info->compute_budget.change_unit_price);
+                print_compute_budget(instruction_info);
+                ADVANCE_INFOS()
             }
         }
     }
