@@ -22,8 +22,7 @@ def lamports_to_bytes(lamports: int) -> str:
 
 ### Proposed values for fees and amounts ###
 
-# AMOUNT          = sol_to_lamports(2.078)
-AMOUNT          = 1
+AMOUNT          = sol_to_lamports(2.078)
 AMOUNT_BYTES    = lamports_to_bytes(AMOUNT)
 
 AMOUNT_2        = sol_to_lamports(101.000001234)

@@ -112,7 +112,7 @@ class ComputeBudgetSetComputeUnitPrice(Instruction):
         self.num_readonly_unsigned_accounts = 1
         self.program_id = base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET)
         self.accounts = []
-        self.data = (ComputeBudgetInstruction.SetComputeUnitLimit).to_bytes(1, byteorder='little') + (lamports_amount).to_bytes(4, byteorder='little')
+        self.data = (ComputeBudgetInstruction.SetComputeUnitPrice).to_bytes(1, byteorder='little') + (lamports_amount).to_bytes(4, byteorder='little')
 
 
 class SystemInstructionTransfer(Instruction):
@@ -153,34 +153,53 @@ class CompiledInstruction:
 # with references to the keys array
 class Message:
     header: MessageHeader
-    account_keys: List[AccountMeta]
+    account_keys: List[bytes]
     recent_blockhash: bytes
     compiled_instructions: List[CompiledInstruction]
 
-    def __init__(self, fee_payer: bytes, instructions: List[Instruction]):
+    def __init__(self, instructions: List[Instruction]):
         self.recent_blockhash = base58.b58decode(FAKE_RECENT_BLOCKHASH)
+
+        print("Starting MSG: instruction len: ", len(instructions))
 
         tmp_num_required_signatures = 0
         tmp_num_readonly_signed_accounts = 0
         tmp_num_readonly_unsigned_accounts = 0
 
-        self.account_keys = [fee_payer]
+        self.account_keys = []
+        writable_accounts = set()
+        readonly_accounts = set()
+
         self.compiled_instructions = []
-        program_index = 0
+
+        # Parse accounts
         for instruction in instructions:
+            readonly_accounts.add(instruction.program_id)
             tmp_num_required_signatures += instruction.num_required_signatures
             tmp_num_readonly_signed_accounts += instruction.num_readonly_signed_accounts
             tmp_num_readonly_unsigned_accounts += instruction.num_readonly_unsigned_accounts
-            program_index += (tmp_num_required_signatures + tmp_num_readonly_signed_accounts)
-            accounts_list = list(filter(None, [instruction.from_pubkey, instruction.to_pubkey, instruction.program_id]))
-            tmp_accounts = []
-            if instruction.program_id != base58.b58decode(PROGRAM_ID_COMPUTE_BUDGET):
-                tmp_accounts = [tmp_num_readonly_unsigned_accounts, 1+tmp_num_readonly_unsigned_accounts]
-            self.compiled_instructions += [CompiledInstruction(program_index, tmp_accounts, instruction.data)]
-            program_index += tmp_num_readonly_unsigned_accounts
-            self.account_keys += accounts_list
+            for account in instruction.accounts:
+                if account.is_writable:
+                    writable_accounts.add(account.pubkey)
+
+        self.account_keys += writable_accounts
+        self.account_keys += readonly_accounts
+
+        # Prepare instructions
+        for instruction in instructions:
+            account_indexes = []
+            for account in instruction.accounts:
+                if account.is_writable:
+                    account_indexes += [self.account_keys.index(account.pubkey)]
+            self.compiled_instructions += [CompiledInstruction(self.account_keys.index(instruction.program_id), account_indexes, instruction.data)]
 
         self.header = MessageHeader(tmp_num_required_signatures, tmp_num_readonly_signed_accounts, tmp_num_readonly_unsigned_accounts)
+        #
+        # print("Summary:")
+        # print("writable_accounts: ", writable_accounts)
+        # print("readonly_accounts: ", readonly_accounts)
+        # print("finalized accounts list: ", self.account_keys)
+        # print("self.header: ", self.header.serialize())
 
     def serialize(self) -> bytes:
         serialized: bytes = self.header.serialize()
