@@ -194,12 +194,6 @@ class Message:
             self.compiled_instructions += [CompiledInstruction(self.account_keys.index(instruction.program_id), account_indexes, instruction.data)]
 
         self.header = MessageHeader(tmp_num_required_signatures, tmp_num_readonly_signed_accounts, tmp_num_readonly_unsigned_accounts)
-        #
-        # print("Summary:")
-        # print("writable_accounts: ", writable_accounts)
-        # print("readonly_accounts: ", readonly_accounts)
-        # print("finalized accounts list: ", self.account_keys)
-        # print("self.header: ", self.header.serialize())
 
     def serialize(self) -> bytes:
         serialized: bytes = self.header.serialize()
