@@ -74,8 +74,8 @@ DEFINES += UNUSED\(x\)=\(void\)x
 ifneq ($(TARGET_NAME),)
     DEFINES += SDK_$(TARGET_NAME)
 else
-	# Use as default value
-	DEFINES += SDK_TARGET_UNKNOWN
+    # Use as default value
+    DEFINES += SDK_TARGET_UNKNOWN
 endif
 
 
@@ -131,12 +131,10 @@ $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 CC      := $(CLANGPATH)clang
-#CFLAGS  += -O3 -Os
-CFLAGS  += -O0 -g
+CFLAGS  += -O3 -Os
 AS      := $(GCCPATH)arm-none-eabi-gcc
 LD      := $(GCCPATH)arm-none-eabi-gcc
-#LDFLAGS += -O3 -Os
-LDFLAGS += -O0 -g
+LDFLAGS += -O3 -Os
 LDLIBS  += -lm -lgcc -lc
 
 include $(BOLOS_SDK)/Makefile.glyphs
