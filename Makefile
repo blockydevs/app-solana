@@ -68,6 +68,17 @@ DEFINES += BLE_SEGMENT_SIZE=32
 DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
 DEFINES += UNUSED\(x\)=\(void\)x
 
+
+# Inject the target name into the build
+# Required in transaction summary to display screens correctly
+ifneq ($(TARGET_NAME),)
+    DEFINES += SDK_$(TARGET_NAME)
+else
+	# Use as default value
+	DEFINES += SDK_TARGET_UNKNOWN
+endif
+
+
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
     DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
 endif
@@ -120,10 +131,12 @@ $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 CC      := $(CLANGPATH)clang
-CFLAGS  += -O3 -Os
+#CFLAGS  += -O3 -Os
+CFLAGS  += -O0 -g
 AS      := $(GCCPATH)arm-none-eabi-gcc
 LD      := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os
+#LDFLAGS += -O3 -Os
+LDFLAGS += -O0 -g
 LDLIBS  += -lm -lgcc -lc
 
 include $(BOLOS_SDK)/Makefile.glyphs
