@@ -3,8 +3,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "parser.h"
+#include "../util.h"
 
-#if defined(SDK_TARGET_NANOX) || defined(SDK_TARGET_NANOS2) || defined(SDK_TARGET_STAX)
+#if EXTENDED_MEMORY
 //Arbitrary number - we don't expect more than 10 resources
 // It is impossible to predict precisely how many user will use
 #define RESOURCES_MAX_LENGTH 10
@@ -34,8 +35,8 @@ typedef struct SiwsInternalChangelistWrapper{
 
 extern SiwsInternalChangelistWrapper G_changelist_wrapper;
 
-//@TODO create better types for these fields
-//For now we assume that every field is string-like
+
+//For now, we assume that every field is string-like
 typedef struct SiwsMessage {
     const char* domain;
     const char* address;

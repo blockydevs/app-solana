@@ -22,11 +22,18 @@ const char valid_chain_ids[7][15] = {
 /**
  * Append new modification to the changelist
  */
-void siws_changelist_append(char delimiter_used, char* delimiter_ptr){
+static int siws_changelist_append(char delimiter_used, char* delimiter_ptr){
     SiwsInternalChangelistWrapper *changelist = &G_changelist_wrapper;
-    SiwsInternalChangelist* changeListItem = &changelist->changelist[changelist->number_of_changes++];
-    changeListItem->delimiter_replaced = delimiter_used;
-    changeListItem->parser_offset = (uint8_t*) delimiter_ptr;
+
+    if(changelist->number_of_changes >= (RESOURCES_MAX_LENGTH + SIWS_FIELDS_COUNT)){
+        return 1;
+    }
+
+    SiwsInternalChangelist* changelist_item = &changelist->changelist[changelist->number_of_changes++];
+    changelist_item->delimiter_replaced = delimiter_used;
+    changelist_item->parser_offset = (uint8_t*) delimiter_ptr;
+
+    return 0;
 }
 
 static int parse_to_char(Parser* parser, char delimiter_char, const char** value){
@@ -41,7 +48,7 @@ static int parse_to_char(Parser* parser, char delimiter_char, const char** value
     //Delimiter char not found till the end of the buffer
     if(delimiter_char_location != NULL){
         *delimiter_char_location = '\0';//Mark string end
-        siws_changelist_append(delimiter_char, delimiter_char_location);
+        BAIL_IF(siws_changelist_append(delimiter_char, delimiter_char_location));
         unsigned int advance_length = strlen(*value) + 1;
         advance(parser, advance_length);
     }else{
@@ -59,7 +66,10 @@ void siws_changelist_rollback(){
     SiwsInternalChangelistWrapper *changelist = &G_changelist_wrapper;
     for(int i = 0; i < changelist->number_of_changes; ++i){
         SiwsInternalChangelist* changelist_item = &changelist->changelist[i];
-        *changelist_item->parser_offset = changelist_item->delimiter_replaced;
+        if(changelist_item->parser_offset == NULL){
+            continue;
+        }
+        *(changelist_item->parser_offset) = changelist_item->delimiter_replaced;
     }
 }
 
@@ -299,7 +309,7 @@ static int internal_parse_siws_message(Parser* parser, SiwsMessage* message){
 
 //FIXME - remove this when memory issues will be resolved
 //NanoS will not parse and display advanced fields (including statement)
-#if !defined(SDK_TARGET_NANOS)
+#if EXTENDED_MEMORY
     //Minimal required message consists of domain and address. Check if further parsing is required
     if(parser->buffer_length > 1){
         //Skip empty line
@@ -333,6 +343,9 @@ int parse_siws_message(Parser* parser, SiwsMessage* message){
 
         siws_changelist_rollback();
     }
+
+    //Reset changelist state
+    explicit_bzero(&G_changelist_wrapper, sizeof(SiwsInternalChangelistWrapper));
 
     return result;
 }

@@ -2,6 +2,8 @@
 #include "include/sol/parser.h"
 #include <assert.h>
 #include <stdio.h>
+#include "util.h"
+
 
 void test_validate_chain_id_valid(){
     const char* chain_id = "testnet";
@@ -170,7 +172,7 @@ void test_parse_siws_message_valid_resources_location(){
     assert(strcmp(siws_msg.domain, "localhost:3001") == 0);
     assert(strcmp(siws_msg.address, "9Pr7yXpVtAVVzEivf8aUNAPDLXXmiHFsMshgjJSySGpn") == 0);
     assert(strcmp(siws_msg.statement, "Clicking Sign or Approve only means you have proved this wallet is owned by you. This request will not trigger any blockchain transaction or cost any gas fee.") == 0);
-    assert(*siws_msg.version == '1');
+    assert(siws_msg.version != NULL && *siws_msg.version == '1');
     assert(strcmp(siws_msg.chain_id, "mainnet") == 0);
     assert(strcmp(siws_msg.request_id, "2137") == 0);
     assert(strcmp(siws_msg.not_before, "2023-10-13 13:33:00") == 0);
@@ -611,16 +613,16 @@ void test_parse_siws_message_invalid_required_fields_no_space(){
 
 
 int main() {
-    test_validate_chain_id_valid();
-    test_is_alphanumeric_invalid();
-    test_validate_chain_id_invalid();
-
     test_is_alphanumeric_valid();
     test_is_alphanumeric_max_length();
+    test_is_alphanumeric_invalid();
+    test_validate_chain_id_valid();
+    test_validate_chain_id_invalid();
 
     test_parse_siws_message_valid();
-    test_parse_siws_message_valid_resources_location();
     test_parse_siws_message_valid_minimal_message();
+    test_parse_siws_message_valid_resources_location();
+    test_parse_siws_message_valid_full_resources_table();
     test_parse_siws_message_invalid_minimal_message();
     test_parse_siws_message_invalid_version_verify_rollback();
     test_parse_siws_message_invalid_nonce_1();
@@ -633,7 +635,6 @@ int main() {
     test_parse_siws_message_invalid_resources_prefix_1();
     test_parse_siws_message_invalid_resources_prefix_2();
     test_parse_siws_message_invalid_required_fields_no_space();
-    test_parse_siws_message_valid_full_resources_table();
 
     printf("passed\n");
     return 0;
