@@ -439,6 +439,19 @@ typedef enum Token_TokenInstruction_Tag {
      *   0. `[writable]`  The native token account to sync with its underlying lamports.
      */
     Token_TokenInstruction_SyncNative,
+
+    Token_TokenExtensionInstruction_TransferFeeExtension = 26,
+
+    Token_TokenExtensionInstruction_ConfidentialTransferExtension = 27,
+
+    Token_TokenExtensionInstruction_DefaultAccountStateExtension = 28,
+
+    Token_TokenExtensionInstruction_MemoTransferExtension = 30,
+
+    Token_TokenExtensionInstruction_InterestBearingMintExtension = 33,
+
+    Token_TokenExtensionInstruction_CpiGuardExtension = 34,
+
 } Token_TokenInstruction_Tag;
 
 typedef struct Token_TokenInstruction_Token_InitializeMint_Body {

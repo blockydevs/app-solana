@@ -2,10 +2,11 @@
 
 #include "sol/parser.h"
 #include "spl_associated_token_account_instruction.h"
-#include "spl_token_instruction.h"
 #include "stake_instruction.h"
 #include "system_instruction.h"
 #include "vote_instruction.h"
+#include "compute_budget_instruction.h"
+#include "spl_token_instruction.h"
 #include <stdbool.h>
 
 enum ProgramId {
@@ -14,9 +15,11 @@ enum ProgramId {
     ProgramIdSystem,
     ProgramIdVote,
     ProgramIdSplToken,
+    ProgramIdToken2022,
     ProgramIdSplAssociatedTokenAccount,
     ProgramIdSplMemo,
     ProgramIdSerumAssertOwner,
+    ProgramIdComputeBudget
 };
 
 typedef struct InstructionInfo {
@@ -27,6 +30,7 @@ typedef struct InstructionInfo {
         StakeInfo stake;
         SystemInfo system;
         VoteInfo vote;
+        ComputeBudgetInfo compute_budget;
     };
 } InstructionInfo;
 
@@ -41,6 +45,7 @@ typedef struct InstructionBrief {
         enum SystemInstructionKind system;
         enum StakeInstructionKind stake;
         enum VoteInstructionKind vote;
+        enum ComputeBudgetInstructionKind compute_budget;
     };
 } InstructionBrief;
 
@@ -48,6 +53,8 @@ typedef struct InstructionBrief {
     { ProgramIdSplAssociatedTokenAccount, .none = 0 }
 #define SPL_TOKEN_IX_BRIEF(spl_token_ix) \
     { ProgramIdSplToken, .spl_token = (spl_token_ix) }
+#define SPL_TOKEN2022_IX_BRIEF(spl_token_ix) \
+    { ProgramIdToken2022, .spl_token = (spl_token_ix) }
 #define SYSTEM_IX_BRIEF(system_ix) \
     { ProgramIdSystem, .system = (system_ix) }
 #define STAKE_IX_BRIEF(stake_ix) \

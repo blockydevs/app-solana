@@ -117,6 +117,7 @@ typedef struct SplTokenSyncNativeInfo {
     const Pubkey* token_account;
 } SplTokenSyncNativeInfo;
 
+
 typedef struct SplTokenInfo {
     SplTokenInstructionKind kind;
     union {
@@ -139,7 +140,9 @@ typedef struct SplTokenInfo {
 int parse_spl_token_instructions(const Instruction* instruction,
                                  const MessageHeader* header,
                                  SplTokenInfo* info);
+
 int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_config);
+
 void summary_item_set_multisig_m_of_n(SummaryItem* item, uint8_t m, uint8_t n);
 
 #define SplTokenOptionPubkeyKind      Token_COption_Pubkey_Tag

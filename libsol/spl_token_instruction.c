@@ -1,17 +1,19 @@
 #include "common_byte_strings.h"
+#include "spl_token_instruction.h"
+#include "spl_token2022_instruction.h"
 #include "instruction.h"
 #include "sol/parser.h"
 #include "sol/transaction_summary.h"
-#include "spl_token_instruction.h"
 #include "token_info.h"
 #include "util.h"
+
 
 const Pubkey spl_token_program_id = {{PROGRAM_ID_SPL_TOKEN}};
 
 static int parse_spl_token_instruction_kind(Parser* parser, SplTokenInstructionKind* kind) {
     uint8_t maybe_kind;
     BAIL_IF(parse_u8(parser, &maybe_kind));
-    switch (maybe_kind) {
+    switch(maybe_kind) {
         case SplTokenKind(InitializeMint):
         case SplTokenKind(InitializeAccount):
         case SplTokenKind(InitializeAccount2):
@@ -26,6 +28,14 @@ static int parse_spl_token_instruction_kind(Parser* parser, SplTokenInstructionK
         case SplTokenKind(FreezeAccount):
         case SplTokenKind(ThawAccount):
         case SplTokenKind(SyncNative):
+
+        //Token2022 extensions
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
             *kind = (SplTokenInstructionKind) maybe_kind;
             return 0;
         // Deprecated instructions
@@ -35,6 +45,7 @@ static int parse_spl_token_instruction_kind(Parser* parser, SplTokenInstructionK
         case SplTokenKind(Burn):
             break;
     }
+
     return 1;
 }
 
@@ -392,6 +403,13 @@ int parse_spl_token_instructions(const Instruction* instruction,
             return parse_burn_spl_token_instruction(&parser, instruction, header, &info->burn);
         case SplTokenKind(SyncNative):
             return parse_sync_native_spl_token_instruction(instruction, header, &info->sync_native);
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+
         // Deprecated instructions
         case SplTokenKind(Transfer):
         case SplTokenKind(Approve):
@@ -399,6 +417,7 @@ int parse_spl_token_instructions(const Instruction* instruction,
         case SplTokenKind(Burn):
             break;
     }
+
     return 1;
 }
 
@@ -689,6 +708,7 @@ static int print_spl_token_sync_native_info(const SplTokenSyncNativeInfo* info,
     return 0;
 }
 
+
 int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_config) {
     switch (info->kind) {
         case SplTokenKind(InitializeMint):
@@ -724,6 +744,14 @@ int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_conf
             return print_spl_token_burn_info(&info->burn, print_config);
         case SplTokenKind(SyncNative):
             return print_spl_token_sync_native_info(&info->sync_native, print_config);
+
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+
         // Deprecated instructions
         case SplTokenKind(Transfer):
         case SplTokenKind(Approve):

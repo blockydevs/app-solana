@@ -2,6 +2,8 @@
 #include "serum_assert_owner_instruction.h"
 #include "spl_memo_instruction.h"
 #include "spl_token_instruction.h"
+#include "spl_token2022_instruction.h"
+#include "compute_budget_instruction.h"
 #include "stake_instruction.h"
 #include "system_instruction.h"
 #include "util.h"
@@ -17,12 +19,16 @@ enum ProgramId instruction_program_id(const Instruction* instruction, const Mess
         return ProgramIdVote;
     } else if (memcmp(program_id, &spl_token_program_id, PUBKEY_SIZE) == 0) {
         return ProgramIdSplToken;
+    } else if(memcmp(program_id, &spl_token2022_program_id, PUBKEY_SIZE) == 0) {
+        return ProgramIdToken2022;
     } else if (memcmp(program_id, &spl_associated_token_account_program_id, PUBKEY_SIZE) == 0) {
         return ProgramIdSplAssociatedTokenAccount;
     } else if (is_serum_assert_owner_program_id(program_id)) {
         return ProgramIdSerumAssertOwner;
     } else if (memcmp(program_id, &spl_memo_program_id, PUBKEY_SIZE) == 0) {
         return ProgramIdSplMemo;
+    } else if (memcmp(program_id, &compute_budget_program_id, PUBKEY_SIZE) == 0) {
+        return ProgramIdComputeBudget;
     }
 
     return ProgramIdUnknown;
@@ -45,6 +51,9 @@ bool instruction_info_matches_brief(const InstructionInfo* info, const Instructi
                 return true;
             case ProgramIdSplMemo:
                 return true;
+            case ProgramIdComputeBudget:
+                return (brief->compute_budget == info->compute_budget.kind);
+            case ProgramIdToken2022:
             case ProgramIdSplToken:
                 return (brief->spl_token == info->spl_token.kind);
             case ProgramIdStake:
