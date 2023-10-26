@@ -35,8 +35,8 @@ typedef struct SiwsInternalChangelistWrapper{
 
 extern SiwsInternalChangelistWrapper G_changelist_wrapper;
 
-
-//For now, we assume that every field is string-like
+//@TODO create better types for these fields
+//For now we assume that every field is string-like
 typedef struct SiwsMessage {
     const char* domain;
     const char* address;

@@ -344,7 +344,7 @@ int parse_siws_message(Parser* parser, SiwsMessage* message){
         siws_changelist_rollback();
     }
 
-    //Reset changelist state
+    //Reset change-list state
     explicit_bzero(&G_changelist_wrapper, sizeof(SiwsInternalChangelistWrapper));
 
     return result;
