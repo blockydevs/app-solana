@@ -20,6 +20,7 @@
 //
 // If all _Required_ `SummaryItem`s have not been set, finalization will fail.
 
+
 #if defined(SDK_TARGET_NANOX) || defined(SDK_TARGET_NANOS2) || defined(SDK_TARGET_STAX)
     #define NUM_GENERAL_ITEMS 40
 #else
@@ -102,6 +103,10 @@ SummaryItem* transaction_summary_nonce_account_item();
 SummaryItem* transaction_summary_nonce_authority_item();
 SummaryItem* transaction_summary_general_item();
 uint8_t transaction_summary_general_item_count();
+uint64_t calculate_additional_transaction_fees();
+
+
+
 uint64_t calculate_additional_transaction_fees();
 
 

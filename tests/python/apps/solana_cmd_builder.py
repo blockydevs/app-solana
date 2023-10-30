@@ -236,10 +236,11 @@ MAX_LEN_LEDGER: int = PACKET_DATA_SIZE - BASE_HEADER_LEN - MESSAGE_HEADER_LEN;
 # Value is the same for ascii as well as for the utf-8
 MAX_LEN_MESSAGE: int = 1232
 
+
 class MessageFormat(IntEnum):
     RestrictedAscii = 0x00
     LimitedUtf8     = 0x01
-    ExtendedUtf8    = 0x02# Not supported by ledger
+    ExtendedUtf8    = 0x02  # Not supported by ledger
 
 
 class OffchainMessage:
@@ -261,7 +262,7 @@ class OffchainMessage:
         self.message_format = message_format
         self.signers = signers
         self.message = message
-        self.version = 0# Only version 0 is supported
+        self.version = 0  # Only version 0 is supported
 
     # Serialize the off-chain message to bytes including full header
     def serialize(self) -> bytes:
