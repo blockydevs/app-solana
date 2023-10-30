@@ -24,12 +24,15 @@ const char valid_chain_ids[7][15] = {
  */
 static int siws_changelist_append(char delimiter_used, char* delimiter_ptr){
     SiwsInternalChangelistWrapper *changelist = &G_changelist_wrapper;
+
     if(changelist->number_of_changes >= (RESOURCES_MAX_LENGTH + SIWS_FIELDS_COUNT)){
         return 1;
     }
+
     SiwsInternalChangelist* changelist_item = &changelist->changelist[changelist->number_of_changes++];
     changelist_item->delimiter_replaced = delimiter_used;
     changelist_item->parser_offset = (uint8_t*) delimiter_ptr;
+
     return 0;
 }
 

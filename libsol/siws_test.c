@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "util.h"
 
+
 void test_validate_chain_id_valid(){
     const char* chain_id = "testnet";
     assert(validate_chain_id(chain_id) == true);
@@ -137,6 +138,7 @@ void test_parse_siws_message_valid(){
     assert(strcmp(siws_msg.resources[0], "https://example.com") == 0);
     assert(strcmp(siws_msg.resources[1], "https://phantom.app/") == 0);
     assert(siws_msg.resources[2] == NULL);
+
 }
 
 void test_parse_siws_message_valid_resources_location(){
@@ -181,6 +183,7 @@ void test_parse_siws_message_valid_resources_location(){
     assert(strcmp(siws_msg.resources[0], "https://example.com") == 0);
     assert(strcmp(siws_msg.resources[1], "https://phantom.app/") == 0);
     assert(siws_msg.resources[2] == NULL);
+
 }
 
 void test_parse_siws_message_valid_minimal_message(){
@@ -244,6 +247,7 @@ void test_parse_siws_message_invalid_minimal_message(){
 
     assert(parser.buffer == parser_initial_position.buffer);
     assert(parser.buffer_length == parser_initial_position.buffer_length);
+
 }
 
 void test_parse_siws_message_invalid_version_verify_rollback(){
@@ -578,6 +582,7 @@ void test_parse_siws_message_valid_full_resources_table(){
     assert(strcmp(siws_msg.resources[7], "https://example8.com") == 0);
     assert(strcmp(siws_msg.resources[8], "https://example9.com") == 0);
     assert(strcmp(siws_msg.resources[9], "https://example10.com") == 0);
+
 }
 
 
