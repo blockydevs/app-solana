@@ -10,7 +10,6 @@
 #include "apdu.h"
 #include "handle_sign_offchain_message.h"
 #include "ui_api.h"
-#include "sol/siws.h"
 
 
 // ensure the command buffer has space to append a NUL terminal
@@ -47,82 +46,6 @@ void ui_general(OffchainMessageHeader *header, bool is_ascii, Parser *parser) {
     }
 }
 
-// Sign-in with solana
-void ui_siws(SiwsMessage *message) {
-    // Minimal message format contains domain and address
-    SummaryItem *item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Domain", message->domain);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Address", message->address);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_extended_string(item, "Statement", message->statement);
-
-
-    // Advanced fields
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "URI", message->uri);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Version", message->version);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Chain ID", message->chain_id);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Nonce", message->nonce);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Issued At", message->issued_at);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Expiration time", message->expiration_time);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Not before", message->not_before);
-
-    item = transaction_summary_general_item();
-    summary_item_safe_set_string(item, "Request Id", message->request_id);
-
-
-    uint8_t general_items_used = transaction_summary_general_item_count();
-    if(general_items_used >= (NUM_GENERAL_ITEMS - 1)){
-        //Display info about number of resources only (we don't have enough space)
-        item = transaction_summary_general_item();
-        uint8_t resources_count = 0;
-        for (unsigned int resource_idx = 0; resource_idx < RESOURCES_MAX_LENGTH; ++resource_idx) {
-            UriString resource = message->resources[resource_idx];
-            if (resource == NULL) {
-                //Resources should be packed one after another (without gaps)
-                break;
-            }
-            resources_count++;
-        }
-
-        summary_item_set_u64(item, "Resources amount", resources_count);
-        return;
-    }else{
-        //Iterate over all resources and try to display them
-        for (unsigned int resource_idx = 0; resource_idx < RESOURCES_MAX_LENGTH; ++resource_idx) {
-            UriString resource = message->resources[resource_idx];
-            if (resource == NULL) {
-                break;
-            }
-
-            item = transaction_summary_general_item();
-            if(item == NULL){
-                //No more screens available
-                break;
-            }
-
-            summary_item_safe_set_string(item, "Resource", resource);
-        }
-    }
-
-}
-
 void setup_ui(OffchainMessageHeader *header, bool is_ascii, Parser *parser, size_t signer_index) {
     // fill out UX steps
     transaction_summary_reset();
@@ -138,15 +61,7 @@ void setup_ui(OffchainMessageHeader *header, bool is_ascii, Parser *parser, size
         summary_item_set_u64(item, "Other signers", header->signers_length);
     }
 
-    SiwsMessage siws_message = {0};
-    if (parse_siws_message(parser, &siws_message) == 0) {
-        // Message parsed successfully as sign-in with solana
-        // Compliant with these specification
-        // https://github.com/phantom/sign-in-with-solana#abnf-message-format
-        ui_siws(&siws_message);
-    } else {
-        ui_general(header, is_ascii, parser);
-    }
+    ui_general(header, is_ascii, parser);
 
     enum SummaryItemKind summary_step_kinds[MAX_TRANSACTION_SUMMARY_ITEMS];
     size_t num_summary_steps = 0;

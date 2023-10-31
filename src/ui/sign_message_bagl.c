@@ -5,15 +5,7 @@
 #include "sol/parser.h"
 #include "sol/transaction_summary.h"
 #include "apdu.h"
-#include "sol/siws.h"
 
-static void send_offchain_signed_response(){
-    //To be able to display strings longer than 45 bytes parser buffer was edited in place during parsing.
-    //Null bytes where placed in correct spots to divide message into smaller pieces.
-    //Before signing that message we need to roll back those changes otherwise signature will differ from what's expected
-    siws_changelist_rollback();
-    sendResponse(set_result_sign_message(), ApduReplySuccess, true);
-}
 
 // Display dynamic transaction item screen
 UX_STEP_NOCB_INIT(ux_summary_step,
@@ -52,14 +44,6 @@ UX_STEP_NOCB_INIT(ux_summary_step_extended,
 UX_STEP_CB(ux_approve_step,
            pb,
            sendResponse(set_result_sign_message(), ApduReplySuccess, true),
-           {
-               &C_icon_validate_14,
-               "Approve",
-           });
-
-UX_STEP_CB(ux_approve_step_offchain,
-           pb,
-           send_offchain_signed_response(),
            {
                &C_icon_validate_14,
                "Approve",
@@ -133,7 +117,7 @@ void start_sign_offchain_message_ui(size_t num_summary_steps, const enum Summary
         }
     }
 
-    flow_steps[num_flow_steps++] = &ux_approve_step_offchain;
+    flow_steps[num_flow_steps++] = &ux_approve_step;
     start_ui_common_end(&num_flow_steps);
 }
 
