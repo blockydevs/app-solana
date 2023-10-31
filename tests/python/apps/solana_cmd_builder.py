@@ -124,7 +124,7 @@ class SystemInstructionTransfer(Instruction):
         self.to_pubkey = to_pubkey
         self.program_id = base58.b58decode(PROGRAM_ID_SYSTEM)
         self.accounts = [AccountMeta(from_pubkey, True, True), AccountMeta(to_pubkey, False, True)]
-        self.data = (SystemInstruction.Transfer).to_bytes(4, byteorder='little') + (amount).to_bytes(8, byteorder='little')
+        self.data = SystemInstruction.Transfer.to_bytes(4, byteorder='little') + amount.to_bytes(8, byteorder='little')
 
 
 # Cheat as we only support 1 SystemInstructionTransfer currently
@@ -165,20 +165,20 @@ class Message:
         tmp_num_readonly_unsigned_accounts = 0
 
         self.account_keys = []
-        writable_accounts = set()
-        readonly_accounts = set()
+        writable_accounts = []
+        readonly_accounts = []
 
         self.compiled_instructions = []
 
         # Parse accounts
         for instruction in instructions:
-            readonly_accounts.add(instruction.program_id)
+            readonly_accounts.append(instruction.program_id)
             tmp_num_required_signatures += instruction.num_required_signatures
             tmp_num_readonly_signed_accounts += instruction.num_readonly_signed_accounts
             tmp_num_readonly_unsigned_accounts += instruction.num_readonly_unsigned_accounts
             for account in instruction.accounts:
                 if account.is_writable:
-                    writable_accounts.add(account.pubkey)
+                    writable_accounts.append(account.pubkey)
 
         self.account_keys += writable_accounts
         self.account_keys += readonly_accounts

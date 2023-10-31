@@ -70,6 +70,7 @@ class TestComputeBudgetTransfer:
         instruction: SystemInstructionTransfer = SystemInstructionTransfer(from_public_key, FOREIGN_PUBLIC_KEY, AMOUNT)
         message: bytes = Message([instruction_unit_limit, instruction]).serialize()
 
+
         # Displayed data and transfer amount should not change
         with sol.send_async_sign_message(SOL_PACKED_DERIVATION_PATH, message):
             navigation_helper_confirm(navigator, backend.firmware.device, test_name)
@@ -193,7 +194,7 @@ class TestMessageSigning:
 
 
 class TestOffchainMessageSigning:
-
+#
     def test_ledger_sign_offchain_message_ascii_ok(self, backend, navigator, test_name):
         sol = SolanaClient(backend)
         from_public_key = sol.get_public_key(SOL_PACKED_DERIVATION_PATH)
@@ -431,42 +432,3 @@ class TestOffchainMessageSigning:
             pass
 
 
-
-class TestSignWithSolana:
-
-    def test_ledger_sign_offchain_message_siws_ok_1_minimal_msg(self, backend, navigator, test_name):
-        sol = SolanaClient(backend)
-        from_public_key = sol.get_public_key(SOL_PACKED_DERIVATION_PATH)
-
-        test_message = b"""localhost:3001 wants you to sign in with your Solana account:
-9Pr7yXpVtAVVzEivf8aUNAPDLXXmiHFsMshgjJSySGpn"""
-
-        offchain_message: OffchainMessage = OffchainMessage(test_message, FOREIGN_PUBLIC_KEY,
-                                                            MessageFormat.RestrictedAscii, [from_public_key])
-        message: bytes = offchain_message.serialize()
-
-        with sol.send_async_sign_offchain_message(SOL_PACKED_DERIVATION_PATH, message):
-            navigation_helper_confirm(navigator, backend.firmware.device, test_name)
-
-        signature: bytes = sol.get_async_response().data
-        verify_signature(from_public_key, message, signature)
-
-    def test_ledger_sign_offchain_message_siws_invalid(self, backend, navigator, test_name):
-        # SIWS is invalid, ledger should treat it as a regular offchain message
-        sol = SolanaClient(backend)
-        from_public_key = sol.get_public_key(SOL_PACKED_DERIVATION_PATH)
-
-        test_message = b"""localhost:3001
-9Pr7yXpVtAVVzEivf8aUNAPDLXXmiHFsMshgjJSySGpn"""
-
-        offchain_message: OffchainMessage = OffchainMessage(test_message, FOREIGN_PUBLIC_KEY,
-                                                            MessageFormat.RestrictedAscii, [from_public_key])
-        message: bytes = offchain_message.serialize()
-
-        with sol.send_async_sign_offchain_message(SOL_PACKED_DERIVATION_PATH, message):
-            navigation_helper_confirm(navigator, backend.firmware.device, test_name)
-
-        signature: bytes = sol.get_async_response().data
-        verify_signature(from_public_key, message, signature)
-
-    # @FIXME - fix multi command tests. Invalid length is generated

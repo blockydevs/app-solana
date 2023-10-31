@@ -1,7 +1,6 @@
 #include "sol/parser.h"
 #include "sol/printer.h"
 #include "sol/transaction_summary.h"
-#include "sol/siws.h"
 #include "util.h"
 #include <string.h>
 
@@ -137,7 +136,6 @@ void transaction_summary_reset() {
     explicit_bzero(&G_transaction_summary, sizeof(TransactionSummary));
     explicit_bzero(&G_transaction_summary_title, TITLE_SIZE);
     explicit_bzero(&G_transaction_summary_text, TEXT_BUFFER_LENGTH);
-    explicit_bzero(&G_changelist_wrapper, sizeof(SiwsInternalChangelistWrapper));
 }
 
 static uint64_t transaction_summary_get_compute_units_limit() {
