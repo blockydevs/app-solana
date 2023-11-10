@@ -17,8 +17,3 @@ __pycache__
 *~
 
 tests/python/snapshots-tmp/
-
-.DS_Store
-
-/*.html
-/*.css
