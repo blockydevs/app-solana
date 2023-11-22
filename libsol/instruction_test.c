@@ -160,7 +160,7 @@ void test_instruction_info_matches_brief_constants(){
     }
 }
 
-void test_instruction_cb_matches_brief(){
+void test_instruction_compute_budget_matches_brief(){
     InstructionInfo info = {
         .kind = ProgramIdComputeBudget,
         .compute_budget = {
@@ -293,7 +293,7 @@ int main() {
     test_instruction_program_id_spl_memo();
     test_instruction_program_id_compute_budget();
     test_instruction_info_matches_brief_constants();
-    test_instruction_cb_matches_brief();
+    test_instruction_compute_budget_matches_brief();
 
     printf("passed\n");
     return 0;
