@@ -5,10 +5,6 @@
 #include "transaction_printers.h"
 #include "util.h"
 
-#define ADVANCE_INFOS() \
-    infos++;\
-    infos_length--;
-
 const InstructionBrief nonce_brief[] = {
     SYSTEM_IX_BRIEF(SystemAdvanceNonceAccount),
 };
@@ -536,32 +532,7 @@ static int print_spl_associated_token_account_create_with_transfer(const PrintCo
     return 0;
 }
 
-static int print_compute_budget_unit_price(InstructionInfo* info) {
-    SummaryItemPayload* item_payload = transaction_summary_payload_priority_fees_item();
-    summary_item_payload_set_u64(item_payload, info->compute_budget.change_unit_price.units);
-    return 0;
-}
 
-static int print_compute_budget_unit_limit(InstructionInfo* info){
-    SummaryItemPayload* item_payload = transaction_summary_payload_compute_units_limit_item();
-    summary_item_payload_set_u64(item_payload, info->compute_budget.change_unit_limit.units);
-    return 0;
-}
-
-static int print_compute_budget(InstructionInfo* info){
-    switch (info->compute_budget.kind) {
-        case ComputeBudgetChangeUnitLimit:
-            print_compute_budget_unit_limit(info);
-            break;
-        case ComputeBudgetChangeUnitPrice:
-            print_compute_budget_unit_price(info);
-            break;
-        case ComputeBudgetRequestUnits:
-        case ComputeBudgetRequestHeapFrame:
-            break;
-    }
-    return 0;
-}
 
 static int print_transaction_nonce_processed(const PrintConfig* print_config,
                                              InstructionInfo* const* infos,
@@ -663,7 +634,8 @@ int print_transaction(const PrintConfig* print_config,
         const InstructionInfo* nonce_info = infos[0];
         print_system_nonced_transaction_sentinel(&(nonce_info->system), print_config);
         // offset parameters given to print_transaction_nonce_processed()
-        ADVANCE_INFOS()
+        infos++;
+        infos_length--;
     }
 
     if (infos_length > 1) {
@@ -672,8 +644,9 @@ int print_transaction(const PrintConfig* print_config,
         for (size_t info_idx = 0; info_idx < infos_length_initial; ++info_idx) {
             InstructionInfo* instruction_info = infos[0];
             if (instruction_info->kind == ProgramIdComputeBudget) {
-                print_compute_budget(instruction_info);
-                ADVANCE_INFOS()
+                print_compute_budget(&instruction_info->compute_budget);
+                infos++;
+                infos_length--;
             }
         }
     }

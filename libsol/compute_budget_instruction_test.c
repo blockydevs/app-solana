@@ -27,6 +27,7 @@ void test_parse_compute_budget_instruction_kind() {
     assert(instruction_kind_target == ComputeBudgetChangeUnitPrice);
 
     // Buffer empty, should fail
+    // parse_u8 should return 1
     assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 1);
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common_byte_strings.h"
+#include "util.h"
 #include "sol/parser.h"
 
 extern const Pubkey compute_budget_program_id;
@@ -10,11 +12,6 @@ enum ComputeBudgetInstructionKind {
     ComputeBudgetChangeUnitLimit,
     ComputeBudgetChangeUnitPrice
 };
-
-typedef struct ComputeBudgetRequestUnitsInfo {
-    uint32_t units;
-    uint32_t additional_fee;
-} ComputeBudgetRequestUnitsInfo;
 
 typedef struct ComputeBudgetRequestHeapFrameInfo {
     uint32_t bytes;
@@ -31,7 +28,6 @@ typedef struct ComputeBudgetChangeUnitPriceInfo {
 typedef struct ComputeBudgetInfo {
     enum ComputeBudgetInstructionKind kind;
     union {
-        ComputeBudgetRequestUnitsInfo request_units;
         ComputeBudgetRequestHeapFrameInfo request_heap_frame;
         ComputeBudgetChangeUnitLimitInfo change_unit_limit;
         ComputeBudgetChangeUnitPriceInfo change_unit_price;
@@ -39,3 +35,9 @@ typedef struct ComputeBudgetInfo {
 } ComputeBudgetInfo;
 
 int parse_compute_budget_instructions(const Instruction* instruction, ComputeBudgetInfo* info);
+
+int print_compute_budget_unit_price(ComputeBudgetChangeUnitPriceInfo* info);
+
+int print_compute_budget_unit_limit(ComputeBudgetChangeUnitLimitInfo* info);
+
+int print_compute_budget(ComputeBudgetInfo* info);
