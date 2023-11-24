@@ -459,8 +459,8 @@ static int print_stake_set_lockup_info(const StakeSetLockupInfo* info,
     return 0;
 }
 
-static int print_stake_split_info(const StakeSplitInfo* info, const PrintConfig* print_config) {
-    BAIL_IF(print_stake_split_info1(info, print_config));
+int print_stake_split_info(const char* primary_title, const StakeSplitInfo* info, const PrintConfig* print_config) {
+    BAIL_IF(print_stake_split_info1(primary_title, info, print_config));
     return print_stake_split_info2(info, print_config);
 }
 
@@ -499,7 +499,7 @@ int print_stake_info(const StakeInfo* info, const PrintConfig* print_config) {
         case StakeSetLockupChecked:
             return print_stake_set_lockup_info(&info->set_lockup, print_config);
         case StakeSplit:
-            return print_stake_split_info(&info->split, print_config);
+            return print_stake_split_info("Split stake", &info->split, print_config);
         case StakeMerge:
             return print_stake_merge_info(&info->merge, print_config);
         // Unsupported instructions
@@ -556,13 +556,17 @@ int print_stake_initialize_info(const char* primary_title,
     return 0;
 }
 
-int print_stake_split_info1(const StakeSplitInfo* info, const PrintConfig* print_config) {
+int print_stake_split_info1(const char* primary_title, const StakeSplitInfo* info, const PrintConfig* print_config) {
     UNUSED(print_config);
 
     SummaryItem* item;
-
-    item = transaction_summary_primary_item();
-    summary_item_set_amount(item, "Split stake", info->lamports);
+    if(primary_title != NULL) {
+        item = transaction_summary_primary_item();
+        summary_item_set_amount(item, primary_title, info->lamports);
+    } else {
+        item = transaction_summary_general_item();
+        summary_item_set_amount(item, "Split stake", info->lamports);
+    }
 
     item = transaction_summary_general_item();
     summary_item_set_pubkey(item, "From", info->account);

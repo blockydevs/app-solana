@@ -327,13 +327,13 @@ static int print_system_authorize_nonce_info(const SystemAuthorizeNonceInfo* inf
     return 0;
 }
 
-static int print_system_allocate_info(const SystemAllocateInfo* info,
-                                      const PrintConfig* print_config) {
+int print_system_allocate_info(const SystemAllocateInfo* info,
+                               const PrintConfig* print_config) {
     UNUSED(print_config);
 
     SummaryItem* item;
 
-    item = transaction_summary_primary_item();
+    item = transaction_summary_general_item();
     summary_item_set_pubkey(item, "Allocate acct", info->account);
 
     item = transaction_summary_general_item();
@@ -342,12 +342,14 @@ static int print_system_allocate_info(const SystemAllocateInfo* info,
     return 0;
 }
 
-static int print_system_assign_info(const SystemAssignInfo* info, const PrintConfig* print_config) {
+int print_system_assign_info(const SystemAssignInfo* info,
+                             const PrintConfig* print_config) {
+
     UNUSED(print_config);
 
     SummaryItem* item;
 
-    item = transaction_summary_primary_item();
+    item = transaction_summary_general_item();
     summary_item_set_pubkey(item, "Assign acct", info->account);
 
     item = transaction_summary_general_item();
@@ -383,8 +385,7 @@ int print_system_info(const SystemInfo* info, const PrintConfig* print_config) {
         case SystemAllocate:
             return print_system_allocate_info(&info->allocate, print_config);
         case SystemAllocateWithSeed:
-            return print_system_allocate_with_seed_info("Allocate acct",
-                                                        &info->allocate_with_seed,
+            return print_system_allocate_with_seed_info(&info->allocate_with_seed,
                                                         print_config);
         case SystemAssignWithSeed:
             break;
@@ -474,15 +475,12 @@ int print_system_initialize_nonce_info(const char* primary_title,
     return 0;
 }
 
-int print_system_allocate_with_seed_info(const char* primary_title,
-                                         const SystemAllocateWithSeedInfo* info,
+int print_system_allocate_with_seed_info(const SystemAllocateWithSeedInfo* info,
                                          const PrintConfig* print_config) {
     SummaryItem* item;
 
-    if (primary_title != NULL) {
-        item = transaction_summary_primary_item();
-        summary_item_set_pubkey(item, "Allocate acct", info->account);
-    }
+    item = transaction_summary_general_item();
+    summary_item_set_pubkey(item, "Allocate acct", info->account);
 
     item = transaction_summary_general_item();
     summary_item_set_u64(item, "Data size", info->space);

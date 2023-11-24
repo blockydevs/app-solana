@@ -180,6 +180,25 @@ const InstructionBrief spl_associated_token_account_create_with_transfer_brief[]
                                    spl_associated_token_account_create_with_transfer_brief, \
                                    infos_length)
 
+const InstructionBrief spl_token_transfer_allocate_assign_brief[] = {
+    SYSTEM_IX_BRIEF(SystemTransfer),
+    SYSTEM_IX_BRIEF(SystemAllocate),
+    SYSTEM_IX_BRIEF(SystemAssign),
+    STAKE_IX_BRIEF(StakeSplit),
+};
+
+#define is_spl_token_transfer_allocate_assign_brief(infos, infos_length) \
+    instruction_infos_match_briefs(infos, spl_token_transfer_allocate_assign_brief, infos_length)
+
+const InstructionBrief spl_token_transfer_allocate_with_seed_brief[] = {
+    SYSTEM_IX_BRIEF(SystemTransfer),
+    SYSTEM_IX_BRIEF(SystemAllocateWithSeed),
+    STAKE_IX_BRIEF(StakeSplit),
+};
+
+#define is_spl_token_transfer_allocate_with_seed_brief(infos, infos_length) \
+    instruction_infos_match_briefs(infos, spl_token_transfer_allocate_with_seed_brief, infos_length)
+
 static int print_create_stake_account(const PrintConfig* print_config,
                                       InstructionInfo* const* infos,
                                       size_t infos_length) {
@@ -233,6 +252,31 @@ static int print_create_stake_account_and_delegate(const PrintConfig* print_conf
     return 0;
 }
 
+static int print_spl_token_transfer_allocate_assign(const PrintConfig* print_config,
+                                                          InstructionInfo* const* infos,
+                                                          size_t infos_length) {
+    UNUSED(infos_length);
+
+    BAIL_IF(print_system_info(&infos[0]->system, print_config));
+    BAIL_IF(print_system_allocate_info(&infos[1]->system.allocate, print_config));
+    BAIL_IF(print_system_assign_info(&infos[2]->system.assign, print_config));
+    BAIL_IF(print_stake_split_info(NULL, &infos[3]->stake.split, print_config));
+
+    return 0;
+}
+
+static int print_spl_token_transfer_allocate_with_seed(const PrintConfig* print_config,
+                                                          InstructionInfo* const* infos,
+                                                          size_t infos_length) {
+    UNUSED(infos_length);
+
+    BAIL_IF(print_system_info(&infos[0]->system, print_config));
+    BAIL_IF(print_system_allocate_with_seed_info(&infos[1]->system.allocate_with_seed, print_config));
+    BAIL_IF(print_stake_split_info(NULL, &infos[2]->stake.split, print_config));
+
+    return 0;
+}
+
 static int print_create_stake_account_with_seed_and_delegate(const PrintConfig* print_config,
                                                              InstructionInfo* const* infos,
                                                              size_t infos_length) {
@@ -274,7 +318,7 @@ static int print_stake_split_with_seed(const PrintConfig* print_config,
 
     const StakeSplitInfo* ss_info = &infos[1]->stake.split;
 
-    BAIL_IF(print_stake_split_info1(ss_info, print_config));
+    BAIL_IF(print_stake_split_info1("Split stake", ss_info, print_config));
 
     if (print_config->expert_mode) {
         SummaryItem* item = transaction_summary_general_item();
@@ -612,9 +656,19 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                 // System allocate/assign have no interesting info, print
                 // stake split as if it were a single instruction
                 return print_stake_info(&infos[2]->stake, print_config);
+            } else if(is_spl_token_transfer_allocate_with_seed_brief(infos, infos_length)) {
+                return print_spl_token_transfer_allocate_with_seed(print_config,
+                                                                   infos,
+                                                                   infos_length);
             }
             break;
-
+        case 4:
+            if(is_spl_token_transfer_allocate_assign_brief(infos, infos_length)) {
+                return print_spl_token_transfer_allocate_assign(print_config,
+                                                                infos,
+                                                                infos_length);
+            }
+            break;
         default:
             break;
     }
