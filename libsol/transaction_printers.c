@@ -640,11 +640,13 @@ int print_transaction(const PrintConfig* print_config,
 
     if (infos_length > 1) {
         // Iterate over infos and print compute budget instructions and offset pointers
+        // Handle ComputeBudget instructions first due to teh limitations of the print_transaction_nonce_processed.
+        // We can get one or 4 ComputeBudget instructions in a single transaction, so we are not able to handle it in a static switch case.
         size_t infos_length_initial = infos_length;
         for (size_t info_idx = 0; info_idx < infos_length_initial; ++info_idx) {
             InstructionInfo* instruction_info = infos[0];
             if (instruction_info->kind == ProgramIdComputeBudget) {
-                print_compute_budget(&instruction_info->compute_budget);
+                print_compute_budget(&instruction_info->compute_budget, print_config);
                 infos++;
                 infos_length--;
             }

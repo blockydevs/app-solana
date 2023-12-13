@@ -1,5 +1,4 @@
 #include "instruction.h"
-#include "serum_assert_owner_instruction.h"
 #include "sol/parser.h"
 #include "sol/message.h"
 #include "sol/print_config.h"
@@ -13,20 +12,7 @@
 #include "compute_budget_instruction.h"
 #include <string.h>
 
-#define MAX_INSTRUCTIONS 6
-
-/**
- * Decides whenever compute budget instruction data should be included on the device's display
- * Currently only priority fee and unit limit are used
- */
-static void handle_compute_budget_instruction_display(InstructionInfo** display_instruction_info,
-                                                      size_t* display_instruction_count,
-                                                      InstructionInfo* info) {
-    if (info->compute_budget.kind == ComputeBudgetChangeUnitPrice || info->compute_budget.kind == ComputeBudgetChangeUnitLimit) {
-        display_instruction_info[*display_instruction_count] = info;
-        (*display_instruction_count)++;
-    }
-}
+#define MAX_INSTRUCTIONS 4
 
 int process_message_body(const uint8_t* message_body,
                          int message_body_length,
@@ -109,13 +95,9 @@ int process_message_body(const uint8_t* message_body,
             case ProgramIdSystem:
             case ProgramIdStake:
             case ProgramIdVote:
+            case ProgramIdComputeBudget:
             case ProgramIdUnknown:
                 display_instruction_info[display_instruction_count++] = info;
-                break;
-            case ProgramIdComputeBudget:
-                handle_compute_budget_instruction_display(display_instruction_info,
-                                                          &display_instruction_count,
-                                                          info);
                 break;
             // Ignored instructions
             case ProgramIdSerumAssertOwner:

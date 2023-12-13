@@ -11,11 +11,9 @@ static int parse_compute_budget_instruction_kind(Parser* parser,
         case ComputeBudgetRequestHeapFrame:
         case ComputeBudgetChangeUnitLimit:
         case ComputeBudgetChangeUnitPrice:
+        case ComputeBudgetSetLoadedAccountsDataSizeLimit:
             *kind = (enum ComputeBudgetInstructionKind) maybe_kind;
             return 0;
-
-        // Deprecated instructions
-        case ComputeBudgetRequestUnits:
         default:
             return 1;
     }
@@ -35,36 +33,51 @@ static int parse_unit_limit_instruction(Parser* parse, ComputeBudgetChangeUnitLi
 }
 
 static int parse_unit_price_instruction(Parser* parse, ComputeBudgetChangeUnitPriceInfo* info) {
+    BAIL_IF(parse_u64(parse, &info->units));
+
+    return 0;
+}
+
+static int parse_loaded_accounts_data_size_limit(Parser* parse, ComputeBudgetSetLoadedAccountsDataSizeLimitInfo* info) {
     BAIL_IF(parse_u32(parse, &info->units));
 
     return 0;
 }
 
-int print_compute_budget_unit_price(ComputeBudgetChangeUnitPriceInfo* info) {
-    SummaryItemPayload* item_payload = transaction_summary_payload_priority_fees_item();
-    summary_item_payload_set_u64(item_payload, info->units);
+static int print_compute_budget_unit_price(ComputeBudgetChangeUnitPriceInfo* info, const PrintConfig* print_config) {
+    UNUSED(print_config);
+
+    SummaryItem* item;
+
+    item = transaction_summary_general_item();
+    summary_item_set_u64(item, "Unit price", info->units);
+
     return 0;
 }
 
-int print_compute_budget_unit_limit(ComputeBudgetChangeUnitLimitInfo* info) {
-    SummaryItemPayload* item_payload = transaction_summary_payload_compute_units_limit_item();
-    summary_item_payload_set_u64(item_payload, info->units);
+static int print_compute_budget_unit_limit(ComputeBudgetChangeUnitLimitInfo* info, const PrintConfig* print_config) {
+    UNUSED(print_config);
+
+    SummaryItem* item;
+
+    item = transaction_summary_general_item();
+    summary_item_set_u64(item, "Unit limit", info->units);
+
     return 0;
 }
 
-int print_compute_budget(ComputeBudgetInfo* info) {
+int print_compute_budget(ComputeBudgetInfo* info, const PrintConfig* print_config) {
     switch (info->kind) {
         case ComputeBudgetChangeUnitLimit:
-            print_compute_budget_unit_limit(&info->change_unit_limit);
-            break;
+            return print_compute_budget_unit_limit(&info->change_unit_limit, print_config);
         case ComputeBudgetChangeUnitPrice:
-            print_compute_budget_unit_price(&info->change_unit_price);
-            break;
+            return print_compute_budget_unit_price(&info->change_unit_price, print_config);
         case ComputeBudgetRequestUnits:
         case ComputeBudgetRequestHeapFrame:
+        case ComputeBudgetSetLoadedAccountsDataSizeLimit:
             break;
     }
-    return 0;
+    return 1;
 }
 
 int parse_compute_budget_instructions(const Instruction* instruction, ComputeBudgetInfo* info) {
@@ -79,9 +92,8 @@ int parse_compute_budget_instructions(const Instruction* instruction, ComputeBud
             return parse_unit_limit_instruction(&parser, &info->change_unit_limit);
         case ComputeBudgetChangeUnitPrice:
             return parse_unit_price_instruction(&parser, &info->change_unit_price);
-
-        // Deprecated instructions
-        case ComputeBudgetRequestUnits:
+        case ComputeBudgetSetLoadedAccountsDataSizeLimit:
+            return parse_loaded_accounts_data_size_limit(&parser, &info->set_loaded_accounts_data_size_limit);
         default:
             return 1;
     }
