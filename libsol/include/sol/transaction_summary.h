@@ -48,21 +48,9 @@ enum SummaryItemKind {
     SummaryItemTimestamp,
 };
 
-// Struct used to transfer data between instruction
-// (e.g. SystemProgram.transfer and ComputeBudget.unitPrice)
-struct SummaryItemPayload {
-    enum SummaryItemKind kind;
-    union {
-        uint64_t u64;
-        // Union left for future expansions
-    };
-};
-
 typedef enum SummaryItemKind SummaryItemKind_t;
 
 typedef struct SummaryItem SummaryItem;
-
-typedef struct SummaryItemPayload SummaryItemPayload;
 
 extern char G_transaction_summary_title[TITLE_SIZE];
 #define TEXT_BUFFER_LENGTH BASE58_PUBKEY_LENGTH
@@ -78,8 +66,6 @@ int transaction_summary_display_item(size_t item_index, enum DisplayFlags flags)
 int transaction_summary_finalize(enum SummaryItemKind* item_kinds, size_t* item_kinds_len);
 
 // Get a pointer to the requested SummaryItem. NULL if it has already been set
-SummaryItemPayload* transaction_summary_payload_priority_fees_item();
-SummaryItemPayload* transaction_summary_payload_compute_units_limit_item();
 SummaryItem* transaction_summary_primary_item();
 SummaryItem* transaction_summary_fee_payer_item();
 SummaryItem* transaction_summary_nonce_account_item();
@@ -87,7 +73,6 @@ SummaryItem* transaction_summary_nonce_authority_item();
 SummaryItem* transaction_summary_general_item();
 
 
-uint64_t calculate_additional_transaction_fees();
 
 
 int transaction_summary_set_fee_payer_pubkey(const Pubkey* pubkey);
@@ -99,7 +84,6 @@ void summary_item_set_token_amount(SummaryItem* item,
                                    uint64_t value,
                                    const char* symbol,
                                    uint8_t decimals);
-void summary_item_payload_set_u64(struct SummaryItemPayload* item_payload, uint64_t value);
 void summary_item_set_i64(SummaryItem* item, const char* title, int64_t value);
 void summary_item_set_u64(SummaryItem* item, const char* title, uint64_t value);
 void summary_item_set_pubkey(SummaryItem* item, const char* title, const Pubkey* value);

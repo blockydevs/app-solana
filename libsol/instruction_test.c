@@ -1,6 +1,6 @@
 #include "common_byte_strings.h"
 #include "instruction.h"
-#include "include/sol/parser.h"
+#include "sol/parser.h"
 #include "spl_memo_instruction.h"
 #include "compute_budget_instruction.h"
 #include "stake_instruction.h"

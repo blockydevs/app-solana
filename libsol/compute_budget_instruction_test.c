@@ -1,18 +1,17 @@
 #include "compute_budget_instruction.c"
-#include "include/sol/parser.h"
+#include "sol/parser.h"
 #include <assert.h>
 #include <stdio.h>
 
 void test_parse_compute_budget_instruction_kind() {
-    uint8_t message[] = {0, 1, 2, 3};
+    uint8_t message[] = {0, 1, 2, 3, 4};
 
     enum ComputeBudgetInstructionKind instruction_kind_target;
 
     Parser parser = {message, sizeof(message)};
 
-    // ComputeBudgetRequestUnits
-    assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 0);
-    assert(instruction_kind_target == ComputeBudgetRequestUnits);
+    // ComputeBudgetRequestUnits - Deprecated
+    assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 1);
 
     // ComputeBudgetRequestHeapFrame
     assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 0);
@@ -25,6 +24,10 @@ void test_parse_compute_budget_instruction_kind() {
     // ComputeBudgetChangeUnitPrice
     assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 0);
     assert(instruction_kind_target == ComputeBudgetChangeUnitPrice);
+
+    // ComputeBudgetSetLoadedAccountsDataSizeLimit
+    assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 0);
+    assert(instruction_kind_target == ComputeBudgetSetLoadedAccountsDataSizeLimit);
 
     // Buffer empty, should fail
     // parse_u8 should return 1

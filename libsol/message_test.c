@@ -1,7 +1,7 @@
 #include "common_byte_strings.h"
-#include "include/sol/parser.h"
-#include "include/sol/print_config.h"
-#include "include/sol/transaction_summary.h"
+#include "sol/parser.h"
+#include "sol/print_config.h"
+#include "sol/transaction_summary.h"
 #include "message.c"
 #include "util.h"
 #include <assert.h>
@@ -167,7 +167,7 @@ void test_process_message_body_transfer_with_compute_budget_limit(){
     0, 0, 0, 0, 0, 0, 0
     };
 
-    process_message_body_and_sanity_check(message, sizeof(message), 4);
+    process_message_body_and_sanity_check(message, sizeof(message), 5);
 }
 
 /**
@@ -190,12 +190,13 @@ void test_process_message_body_transfer_with_compute_budget_limit_and_unit_price
         0, 0, 0, 0, 0, 0, 0
     };
 
-    process_message_body_and_sanity_check(message, sizeof(message), 4);
+    process_message_body_and_sanity_check(message, sizeof(message), 6);
 
 }
 
 /*
  * Transfer 5 lamports with additional request units instruction
+ * Should fail - RequestUnits is deprecated and not supported
  */
 void test_process_message_body_transfer_with_request_units(){
 
@@ -213,7 +214,12 @@ void test_process_message_body_transfer_with_request_units(){
         0, 0, 0, 0, 0, 0, 0
     };
 
-    process_message_body_and_sanity_check(message, sizeof(message), 4);
+    PrintConfig print_config;
+    Parser parser = { message, sizeof(message) };
+    assert(parse_message_header(&parser, &print_config.header) == 0);
+
+    transaction_summary_reset();
+    assert(process_message_body(parser.buffer, parser.buffer_length, &print_config) == 1);
 
 }
 
