@@ -1,5 +1,4 @@
 #include "instruction.h"
-#include "serum_assert_owner_instruction.h"
 #include "sol/parser.h"
 #include "sol/message.h"
 #include "sol/print_config.h"
@@ -10,6 +9,7 @@
 #include "vote_instruction.h"
 #include "transaction_printers.h"
 #include "util.h"
+#include "compute_budget_instruction.h"
 #include <string.h>
 
 #define MAX_INSTRUCTIONS 4
@@ -53,7 +53,7 @@ int process_message_body(const uint8_t* message_body,
                 break;
             }
             case ProgramIdSplMemo: {
-                // SPL Memo only has one instruction and we ignore it for now
+                // SPL Memo only has one instruction, and we ignore it for now
                 info->kind = program_id;
                 break;
             }
@@ -80,6 +80,12 @@ int process_message_body(const uint8_t* message_body,
                 }
                 break;
             }
+            case ProgramIdComputeBudget: {
+                if (parse_compute_budget_instructions(&instruction, &info->compute_budget) == 0) {
+                    info->kind = program_id;
+                }
+                break;
+            }
             case ProgramIdUnknown:
                 break;
         }
@@ -89,6 +95,7 @@ int process_message_body(const uint8_t* message_body,
             case ProgramIdSystem:
             case ProgramIdStake:
             case ProgramIdVote:
+            case ProgramIdComputeBudget:
             case ProgramIdUnknown:
                 display_instruction_info[display_instruction_count++] = info;
                 break;
@@ -108,7 +115,7 @@ int process_message_body(const uint8_t* message_body,
     // Ensure we've consumed the entire message body
     BAIL_IF(!parser_is_empty(&parser));
 
-    // If we don't know about all of the instructions, bail
+    // If we don't know about all the instructions, bail
     for (size_t i = 0; i < instruction_count; i++) {
         BAIL_IF(instruction_info[i].kind == ProgramIdUnknown);
     }

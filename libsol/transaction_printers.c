@@ -532,6 +532,8 @@ static int print_spl_associated_token_account_create_with_transfer(const PrintCo
     return 0;
 }
 
+
+
 static int print_transaction_nonce_processed(const PrintConfig* print_config,
                                              InstructionInfo* const* infos,
                                              size_t infos_length) {
@@ -552,6 +554,8 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                         print_config);
                 case ProgramIdSerumAssertOwner:
                 case ProgramIdSplMemo:
+                // If pointers are advanced before, this case won't be needed
+                case ProgramIdComputeBudget:
                 case ProgramIdUnknown:
                     break;
             }
@@ -632,6 +636,21 @@ int print_transaction(const PrintConfig* print_config,
         // offset parameters given to print_transaction_nonce_processed()
         infos++;
         infos_length--;
+    }
+
+    if (infos_length > 1) {
+        // Iterate over infos and print compute budget instructions and offset pointers
+        // Handle ComputeBudget instructions first due to teh limitations of the print_transaction_nonce_processed.
+        // We can get one or 4 ComputeBudget instructions in a single transaction, so we are not able to handle it in a static switch case.
+        size_t infos_length_initial = infos_length;
+        for (size_t info_idx = 0; info_idx < infos_length_initial; ++info_idx) {
+            InstructionInfo* instruction_info = infos[0];
+            if (instruction_info->kind == ProgramIdComputeBudget) {
+                print_compute_budget(&instruction_info->compute_budget, print_config);
+                infos++;
+                infos_length--;
+            }
+        }
     }
 
     return print_transaction_nonce_processed(print_config, infos, infos_length);
