@@ -20,15 +20,7 @@
 //
 // If all _Required_ `SummaryItem`s have not been set, finalization will fail.
 
-
-#if defined(SDK_TARGET_NANOX) || defined(SDK_TARGET_NANOS2) || defined(SDK_TARGET_STAX)
-    #define NUM_GENERAL_ITEMS 40
-#else
-    //Memory constraints on Nano S does not allow for more than 13 general items
-    //Or if target is unknown
-    #define NUM_GENERAL_ITEMS 12
-#endif
-
+#define NUM_GENERAL_ITEMS 11
 #define DEFAULT_COMPUTE_UNIT_LIMIT 200000
 #define COMPUTE_UNIT_PRICE_DIVIDER 1000000
 #define MAX_TRANSACTION_SUMMARY_ITEMS              \
@@ -90,6 +82,9 @@ SummaryItem* transaction_summary_nonce_authority_item();
 SummaryItem* transaction_summary_general_item();
 uint8_t transaction_summary_general_item_count();
 uint64_t calculate_additional_transaction_fees();
+
+
+
 
 
 
