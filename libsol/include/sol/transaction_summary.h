@@ -20,6 +20,8 @@
 // If all _Required_ `SummaryItem`s have not been set, finalization will fail.
 
 #define NUM_GENERAL_ITEMS 11
+#define DEFAULT_COMPUTE_UNIT_LIMIT 200000
+#define COMPUTE_UNIT_PRICE_DIVIDER 1000000
 #define MAX_TRANSACTION_SUMMARY_ITEMS              \
     (1                       /* primary */         \
      + NUM_GENERAL_ITEMS + 1 /* nonce_account */   \
@@ -45,6 +47,7 @@ enum SummaryItemKind {
     SummaryItemString,
     SummaryItemTimestamp,
 };
+
 typedef enum SummaryItemKind SummaryItemKind_t;
 
 typedef struct SummaryItem SummaryItem;
@@ -68,6 +71,9 @@ SummaryItem* transaction_summary_fee_payer_item();
 SummaryItem* transaction_summary_nonce_account_item();
 SummaryItem* transaction_summary_nonce_authority_item();
 SummaryItem* transaction_summary_general_item();
+
+
+
 
 int transaction_summary_set_fee_payer_pubkey(const Pubkey* pubkey);
 

@@ -98,6 +98,7 @@ void transaction_summary_reset() {
     explicit_bzero(&G_transaction_summary_text, TEXT_BUFFER_LENGTH);
 }
 
+
 static bool is_summary_item_used(const SummaryItem* item) {
     return (item->kind != SummaryItemNone);
 }
@@ -208,7 +209,6 @@ static int transaction_summary_update_display_for_item(const SummaryItem* item,
 //     used summary->nonce_account
 //     used summary->nonce_authority
 //     summary->fee_payer
-
 static SummaryItem* transaction_summary_find_item(size_t item_index) {
     struct TransactionSummary* summary = &G_transaction_summary;
     size_t current_index = 0;
