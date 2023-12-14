@@ -18,8 +18,8 @@
 ifeq ($(BOLOS_SDK),)
     # `THIS_DIR` must be resolved BEFORE any `include` directives
     THIS_DIR   := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-    TARGET_SDK := $(shell ./util/read-last-sdk)
-    BOLOS_SDK  := ${$(TARGET_SDK)}
+		TARGET_SDK := $(shell ./util/read-last-sdk)
+		BOLOS_SDK  := ${$(TARGET_SDK)}
 endif
 
 ifeq ($(BOLOS_SDK),)

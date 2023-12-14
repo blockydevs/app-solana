@@ -47,7 +47,7 @@ void ui_general(OffchainMessageHeader *header, bool is_ascii, Parser *parser) {
 }
 
 void setup_ui(OffchainMessageHeader *header, bool is_ascii, Parser *parser, size_t signer_index) {
-    // fill out UX steps
+    // fill out UI steps
     transaction_summary_reset();
     SummaryItem *item = transaction_summary_primary_item();
     summary_item_set_string(item, "Sign", "Off-Chain Message");

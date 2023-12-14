@@ -1,9 +1,9 @@
 #include "common_byte_strings.h"
 #include "instruction.h"
 #include "parser.c"
-#include "include/sol/parser.h"
-#include "include/sol/printer.h"
-#include "include/sol/offchain_message_signing.h"
+#include "sol/parser.h"
+#include "sol/printer.h"
+#include "sol/offchain_message_signing.h"
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -258,7 +258,6 @@ void test_parse_pubkeys() {
     assert(parser.buffer == message + ARRAY_LEN(message));
     const Pubkey expected_pubkey = {{BYTES32_BS58_2}};
     assert_pubkey_equal(&pubkeys[0], &expected_pubkey);
-    //assert(pubkeys->data[0] == 42);
 }
 
 void test_parse_pubkeys_too_short() {
