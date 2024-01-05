@@ -72,7 +72,6 @@ int print_compute_budget(ComputeBudgetInfo* info, const PrintConfig* print_confi
             return print_compute_budget_unit_limit(&info->change_unit_limit, print_config);
         case ComputeBudgetChangeUnitPrice:
             return print_compute_budget_unit_price(&info->change_unit_price, print_config);
-        case ComputeBudgetRequestUnits:
         case ComputeBudgetRequestHeapFrame:
         case ComputeBudgetSetLoadedAccountsDataSizeLimit:
             break;

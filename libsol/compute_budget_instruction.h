@@ -8,8 +8,7 @@
 extern const Pubkey compute_budget_program_id;
 
 enum ComputeBudgetInstructionKind {
-    ComputeBudgetRequestUnits = 0,//Deprecated
-    ComputeBudgetRequestHeapFrame,
+    ComputeBudgetRequestHeapFrame = 1,
     ComputeBudgetChangeUnitLimit,
     ComputeBudgetChangeUnitPrice,
     ComputeBudgetSetLoadedAccountsDataSizeLimit

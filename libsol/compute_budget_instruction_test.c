@@ -4,14 +4,11 @@
 #include <stdio.h>
 
 void test_parse_compute_budget_instruction_kind() {
-    uint8_t message[] = {0, 1, 2, 3, 4};
+    uint8_t message[] = {1, 2, 3, 4};
 
     enum ComputeBudgetInstructionKind instruction_kind_target;
 
     Parser parser = {message, sizeof(message)};
-
-    // ComputeBudgetRequestUnits - Deprecated
-    assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 1);
 
     // ComputeBudgetRequestHeapFrame
     assert(parse_compute_budget_instruction_kind(&parser, &instruction_kind_target) == 0);

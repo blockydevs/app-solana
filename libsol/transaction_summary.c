@@ -98,7 +98,6 @@ void transaction_summary_reset() {
     explicit_bzero(&G_transaction_summary_text, TEXT_BUFFER_LENGTH);
 }
 
-
 static bool is_summary_item_used(const SummaryItem* item) {
     return (item->kind != SummaryItemNone);
 }
