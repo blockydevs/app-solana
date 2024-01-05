@@ -59,7 +59,6 @@ typedef struct MessageHeader {
     size_t instructions_length;
 } MessageHeader;
 
-//@TODO move to offchain message sign .h
 #define OFFCHAIN_MESSAGE_APPLICATION_DOMAIN_LENGTH 32
 typedef struct OffchainMessageApplicationDomain {
     uint8_t data[OFFCHAIN_MESSAGE_APPLICATION_DOMAIN_LENGTH];

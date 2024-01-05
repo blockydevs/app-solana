@@ -152,14 +152,15 @@ int parse_offchain_message_application_domain(
 }
 
 /**
- * Field	    Start offset	        Length (bytes)
- * Signing Domain	0x00	                    16
- * Header version	0x10	                    1
- * Application domain	0x11	                    32
- * Message format	0x31	                    1
- * Signer count	        0x32	                    1
- * Signers	        0x33	                    SIGNER_COUNT * 32
- * Message length	0x33 + SIGNER_CNT * 32	    2
+ * Field	       Start offset                Length (bytes)
+ * Signing Domain      0x00                         16
+ * Header version      0x10                          1
+ * Application domain  0x11                         32
+ * Message format      0x31                          1
+ * Signer count        0x32                          1
+ * Signers             0x33                     SIGNER_COUNT * 32
+ * Message length      0x33 + SIGNER_CNT * 32	     2
+ * https://docs.solana.com/proposals/off-chain-message-signing
  */
 int parse_offchain_message_header(Parser* parser, OffchainMessageHeader* header) {
     const size_t domain_len = OFFCHAIN_MESSAGE_SIGNING_DOMAIN_LENGTH;

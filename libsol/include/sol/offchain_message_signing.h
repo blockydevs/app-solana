@@ -11,6 +11,7 @@
 * 5. Signer count (1 bytes)
 * 6. Signers (signer_count *  32 bytes) - assume that only one signer is present
 * 7. Message length (2 bytes)
+* https://docs.solana.com/proposals/off-chain-message-signing
 */
 typedef struct OffchainMessageSigningDomain {
     uint8_t data[OFFCHAIN_MESSAGE_SIGNING_DOMAIN_LENGTH];
