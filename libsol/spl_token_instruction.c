@@ -3,6 +3,7 @@
 #include "sol/parser.h"
 #include "sol/transaction_summary.h"
 #include "spl_token_instruction.h"
+#include "spl_token2022_instruction.h"
 #include "token_info.h"
 #include "util.h"
 
@@ -26,6 +27,19 @@ static int parse_spl_token_instruction_kind(Parser* parser, SplTokenInstructionK
         case SplTokenKind(FreezeAccount):
         case SplTokenKind(ThawAccount):
         case SplTokenKind(SyncNative):
+
+            //Token2022 extensions
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+        case SplTokenExtensionKind(TransferHookExtension):
+        case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+        case SplTokenExtensionKind(MetadataPointerExtension):
+        case SplTokenExtensionKind(GroupPointerExtension):
+        case SplTokenExtensionKind(GroupMemberPointerExtension):
             *kind = (SplTokenInstructionKind) maybe_kind;
             return 0;
         // Deprecated instructions
@@ -392,6 +406,21 @@ int parse_spl_token_instructions(const Instruction* instruction,
             return parse_burn_spl_token_instruction(&parser, instruction, header, &info->burn);
         case SplTokenKind(SyncNative):
             return parse_sync_native_spl_token_instruction(instruction, header, &info->sync_native);
+
+        //Currently we do not need to parse these extensions in any way
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+        case SplTokenExtensionKind(TransferHookExtension):
+        case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+        case SplTokenExtensionKind(MetadataPointerExtension):
+        case SplTokenExtensionKind(GroupPointerExtension):
+        case SplTokenExtensionKind(GroupMemberPointerExtension):
+            return 0;
+
         // Deprecated instructions
         case SplTokenKind(Transfer):
         case SplTokenKind(Approve):
@@ -724,6 +753,20 @@ int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_conf
             return print_spl_token_burn_info(&info->burn, print_config);
         case SplTokenKind(SyncNative):
             return print_spl_token_sync_native_info(&info->sync_native, print_config);
+
+        //For now, we don't display any information about the extensions
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+        case SplTokenExtensionKind(TransferHookExtension):
+        case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+        case SplTokenExtensionKind(MetadataPointerExtension):
+        case SplTokenExtensionKind(GroupPointerExtension):
+        case SplTokenExtensionKind(GroupMemberPointerExtension):
+
         // Deprecated instructions
         case SplTokenKind(Transfer):
         case SplTokenKind(Approve):

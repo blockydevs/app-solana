@@ -15,6 +15,7 @@ enum ProgramId {
     ProgramIdSystem,
     ProgramIdVote,
     ProgramIdSplToken,
+    ProgramIdToken2022,
     ProgramIdSplAssociatedTokenAccount,
     ProgramIdSplMemo,
     ProgramIdSerumAssertOwner,

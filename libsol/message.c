@@ -57,6 +57,7 @@ int process_message_body(const uint8_t* message_body,
                 info->kind = program_id;
                 break;
             }
+            case ProgramIdToken2022:
             case ProgramIdSplToken:
                 if (parse_spl_token_instructions(&instruction, header, &info->spl_token) == 0) {
                     info->kind = program_id;
@@ -99,6 +100,8 @@ int process_message_body(const uint8_t* message_body,
             case ProgramIdUnknown:
                 display_instruction_info[display_instruction_count++] = info;
                 break;
+            //Currently we don't display these instructions
+            case ProgramIdToken2022:
             // Ignored instructions
             case ProgramIdSerumAssertOwner:
             case ProgramIdSplMemo:
