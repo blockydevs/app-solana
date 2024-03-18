@@ -4,7 +4,6 @@
 #include "sol/transaction_summary.h"
 #include "transaction_printers.h"
 #include "util.h"
-#include "spl_token2022_instruction.h"
 
 const InstructionBrief nonce_brief[] = {
     SYSTEM_IX_BRIEF(SystemAdvanceNonceAccount),
@@ -545,8 +544,6 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                     return print_stake_info(&(infos[0]->stake), print_config);
                 case ProgramIdVote:
                     return print_vote_info(&(infos[0]->vote), print_config);
-                case ProgramIdToken2022:
-                    return print_token2022_info(&(infos[0]->spl_token), print_config);
                 case ProgramIdSplToken:
                     return print_spl_token_info(&(infos[0]->spl_token), print_config);
                 case ProgramIdSplAssociatedTokenAccount:

@@ -10,5 +10,3 @@
 
 extern const Pubkey spl_token2022_program_id;
 
-
-int print_token2022_info(const SplTokenInfo* info, const PrintConfig* print_config);
