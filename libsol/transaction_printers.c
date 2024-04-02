@@ -623,6 +623,16 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
     return 1;
 }
 
+int print_spl_token_extension_warning(){
+
+    SummaryItem* item = transaction_summary_general_item();
+    summary_item_set_string(item, "Extension Warning", "Unsupported extensions found");
+    item = transaction_summary_general_item();
+    summary_item_set_string(item, "","Verify transaction before signing");
+
+    return 0;
+}
+
 int print_transaction(const PrintConfig* print_config,
                       InstructionInfo* const* infos,
                       size_t infos_length) {

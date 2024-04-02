@@ -340,7 +340,9 @@ static int parse_sync_native_spl_token_instruction(const Instruction* instructio
 
 int parse_spl_token_instructions(const Instruction* instruction,
                                  const MessageHeader* header,
-                                 SplTokenInfo* info) {
+                                 SplTokenInfo* info,
+                                 SplTokenExtensionsMetadata* token_extensions_metadata,
+                                 bool* ignore_instruction_info) {
     Parser parser = {instruction->data, instruction->data_length};
 
     BAIL_IF(parse_spl_token_instruction_kind(&parser, &info->kind));
@@ -407,18 +409,23 @@ int parse_spl_token_instructions(const Instruction* instruction,
         case SplTokenKind(SyncNative):
             return parse_sync_native_spl_token_instruction(instruction, header, &info->sync_native);
 
-        //Currently we do not need to parse these extensions in any way
+        // Currently we do not need to parse these extensions in any way
         case SplTokenExtensionKind(TransferFeeExtension):
         case SplTokenExtensionKind(ConfidentialTransferExtension):
-        case SplTokenExtensionKind(DefaultAccountStateExtension):
         case SplTokenExtensionKind(MemoTransferExtension):
-        case SplTokenExtensionKind(InterestBearingMintExtension):
-        case SplTokenExtensionKind(CpiGuardExtension):
         case SplTokenExtensionKind(TransferHookExtension):
         case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+            // Mark that we have encountered not fully supported extension
+            token_extensions_metadata->generate_extension_warning = true;
+        __attribute__((fallthrough));
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
         case SplTokenExtensionKind(MetadataPointerExtension):
         case SplTokenExtensionKind(GroupPointerExtension):
         case SplTokenExtensionKind(GroupMemberPointerExtension):
+            //Don't generate any screens for the user for any extension
+            *ignore_instruction_info = true;
             return 0;
 
         // Deprecated instructions
