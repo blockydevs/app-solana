@@ -40,7 +40,7 @@ APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 APPNAME      = "Solana"
 APPVERSION_M = 1
 APPVERSION_N = 4
-APPVERSION_P = 2
+APPVERSION_P = 3
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
@@ -130,6 +130,9 @@ include $(BOLOS_SDK)/Makefile.glyphs
 
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+
+# Allow usage of function from lib_standard_app/crypto_helpers.c
+APP_SOURCE_FILES += ${BOLOS_SDK}/lib_standard_app/crypto_helpers.c
 
 ifneq ($(TARGET_NAME),TARGET_STAX)
 SDK_SOURCE_PATH += lib_ux

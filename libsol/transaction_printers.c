@@ -87,6 +87,23 @@ const InstructionBrief stake_split_with_seed_brief_v1_2[] = {
 #define is_stake_split_with_seed_v1_2(infos, infos_length) \
     instruction_infos_match_briefs(infos, stake_split_with_seed_brief_v1_2, infos_length)
 
+const InstructionBrief stake_split_brief_v1_3[] = {
+    SYSTEM_IX_BRIEF(SystemTransfer),
+    SYSTEM_IX_BRIEF(SystemAllocate),
+    SYSTEM_IX_BRIEF(SystemAssign),
+    STAKE_IX_BRIEF(StakeSplit),
+};
+#define is_stake_split_v1_3(infos, infos_length) \
+    instruction_infos_match_briefs(infos, stake_split_brief_v1_3, infos_length)
+
+const InstructionBrief stake_split_with_seed_brief_v1_3[] = {
+    SYSTEM_IX_BRIEF(SystemTransfer),
+    SYSTEM_IX_BRIEF(SystemAllocateWithSeed),
+    STAKE_IX_BRIEF(StakeSplit),
+};
+#define is_stake_split_with_seed_v1_3(infos, infos_length) \
+    instruction_infos_match_briefs(infos, stake_split_with_seed_brief_v1_3, infos_length)
+
 const InstructionBrief stake_authorize_both_brief[] = {
     STAKE_IX_BRIEF(StakeAuthorize),
     STAKE_IX_BRIEF(StakeAuthorize),
@@ -284,6 +301,28 @@ static int print_stake_split_with_seed(const PrintConfig* print_config,
     }
 
     BAIL_IF(print_stake_split_info2(ss_info, print_config));
+
+    return 0;
+}
+
+static int print_prefunded_split(const PrintConfig* print_config,
+                                 InstructionInfo* const* infos,
+                                 size_t infos_length) {
+    UNUSED(infos_length);
+
+    BAIL_IF(print_system_prefund_for_split(&infos[0]->system, print_config));
+    BAIL_IF(print_stake_split_info(&infos[3]->stake.split, print_config));
+
+    return 0;
+}
+
+static int print_prefunded_split_with_seed(const PrintConfig* print_config,
+                                           InstructionInfo* const* infos,
+                                           size_t infos_length) {
+    UNUSED(infos_length);
+
+    BAIL_IF(print_system_prefund_for_split(&infos[0]->system, print_config));
+    BAIL_IF(print_stake_split_with_seed(print_config, &infos[1], 2, true));
 
     return 0;
 }
@@ -613,6 +652,13 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                 // System allocate/assign have no interesting info, print
                 // stake split as if it were a single instruction
                 return print_stake_info(&infos[2]->stake, print_config);
+            } else if(is_stake_split_with_seed_v1_3(infos, infos_length)) {
+                return print_prefunded_split_with_seed(print_config, infos, infos_length);
+            }
+            break;
+        case 4:
+            if(is_stake_split_v1_3(infos, infos_length)) {
+                return print_prefunded_split(print_config, infos, infos_length);
             }
             break;
 

@@ -21,17 +21,9 @@ typedef enum rlpTxType {
     TX_FEE
 } rlpTxType;
 
-void get_public_key(uint8_t *publicKeyArray, const uint32_t *derivationPath, size_t pathLength);
-
-uint32_t readUint32BE(uint8_t *buffer);
-
-void get_private_key(cx_ecfp_private_key_t *privateKey,
-                     const uint32_t *derivationPath,
-                     size_t pathLength);
-
-void get_private_key_with_seed(cx_ecfp_private_key_t *privateKey,
-                               const uint32_t *derivationPath,
-                               uint8_t pathLength);
+void get_public_key(uint8_t publicKeyArray[static PUBKEY_LENGTH],
+                    const uint32_t *derivationPath,
+                    size_t pathLength);
 
 /**
  * Deserialize derivation path from raw bytes.
