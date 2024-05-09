@@ -3,6 +3,7 @@
 #include "sol/parser.h"
 #include "sol/transaction_summary.h"
 #include "spl_token_instruction.h"
+#include "spl_token2022_instruction.h"
 #include "token_info.h"
 #include "util.h"
 
@@ -26,6 +27,19 @@ static int parse_spl_token_instruction_kind(Parser* parser, SplTokenInstructionK
         case SplTokenKind(FreezeAccount):
         case SplTokenKind(ThawAccount):
         case SplTokenKind(SyncNative):
+
+            //Token2022 extensions
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+        case SplTokenExtensionKind(TransferHookExtension):
+        case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+        case SplTokenExtensionKind(MetadataPointerExtension):
+        case SplTokenExtensionKind(GroupPointerExtension):
+        case SplTokenExtensionKind(GroupMemberPointerExtension):
             *kind = (SplTokenInstructionKind) maybe_kind;
             return 0;
         // Deprecated instructions
@@ -326,7 +340,9 @@ static int parse_sync_native_spl_token_instruction(const Instruction* instructio
 
 int parse_spl_token_instructions(const Instruction* instruction,
                                  const MessageHeader* header,
-                                 SplTokenInfo* info) {
+                                 SplTokenInfo* info,
+                                 SplTokenExtensionsMetadata* token_extensions_metadata,
+                                 bool* ignore_instruction_info) {
     Parser parser = {instruction->data, instruction->data_length};
 
     BAIL_IF(parse_spl_token_instruction_kind(&parser, &info->kind));
@@ -392,6 +408,26 @@ int parse_spl_token_instructions(const Instruction* instruction,
             return parse_burn_spl_token_instruction(&parser, instruction, header, &info->burn);
         case SplTokenKind(SyncNative):
             return parse_sync_native_spl_token_instruction(instruction, header, &info->sync_native);
+
+        // Currently we do not need to parse these extensions in any way
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(TransferHookExtension):
+        case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+            // Mark that we have encountered not fully supported extension
+            token_extensions_metadata->generate_extension_warning = true;
+        __attribute__((fallthrough));
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+        case SplTokenExtensionKind(MetadataPointerExtension):
+        case SplTokenExtensionKind(GroupPointerExtension):
+        case SplTokenExtensionKind(GroupMemberPointerExtension):
+            //Don't generate any screens for the user for any extension
+            *ignore_instruction_info = true;
+            return 0;
+
         // Deprecated instructions
         case SplTokenKind(Transfer):
         case SplTokenKind(Approve):
@@ -486,6 +522,7 @@ static int print_spl_token_initialize_multisig_info(const char* primary_title,
 
 int print_spl_token_transfer_info(const SplTokenTransferInfo* info,
                                   const PrintConfig* print_config,
+                                  bool is_token2022_kind,
                                   bool primary) {
     SummaryItem* item;
 
@@ -507,6 +544,14 @@ int print_spl_token_transfer_info(const SplTokenTransferInfo* info,
 
     item = transaction_summary_general_item();
     summary_item_set_pubkey(item, "To", info->dest_account);
+
+    if(is_token2022_kind){
+        item = transaction_summary_general_item();
+        summary_item_set_string(item, "Extension warning", "");
+
+        item = transaction_summary_general_item();
+        summary_item_set_string(item, "", "Can't check mint extensions - Check explorer");
+    }
 
     print_spl_token_sign(&info->sign, print_config);
 
@@ -715,7 +760,7 @@ int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_conf
         case SplTokenKind(ThawAccount):
             return print_spl_token_thaw_account_info(&info->thaw_account, print_config);
         case SplTokenKind(TransferChecked):
-            return print_spl_token_transfer_info(&info->transfer, print_config, true);
+            return print_spl_token_transfer_info(&info->transfer, print_config, info->is_token2022_kind, true);
         case SplTokenKind(ApproveChecked):
             return print_spl_token_approve_info(&info->approve, print_config);
         case SplTokenKind(MintToChecked):
@@ -724,6 +769,20 @@ int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_conf
             return print_spl_token_burn_info(&info->burn, print_config);
         case SplTokenKind(SyncNative):
             return print_spl_token_sync_native_info(&info->sync_native, print_config);
+
+        //For now, we don't display any information about the extensions
+        case SplTokenExtensionKind(TransferFeeExtension):
+        case SplTokenExtensionKind(ConfidentialTransferExtension):
+        case SplTokenExtensionKind(DefaultAccountStateExtension):
+        case SplTokenExtensionKind(MemoTransferExtension):
+        case SplTokenExtensionKind(InterestBearingMintExtension):
+        case SplTokenExtensionKind(CpiGuardExtension):
+        case SplTokenExtensionKind(TransferHookExtension):
+        case SplTokenExtensionKind(ConfidentialTransferFeeExtension):
+        case SplTokenExtensionKind(MetadataPointerExtension):
+        case SplTokenExtensionKind(GroupPointerExtension):
+        case SplTokenExtensionKind(GroupMemberPointerExtension):
+
         // Deprecated instructions
         case SplTokenKind(Transfer):
         case SplTokenKind(Approve):
@@ -769,4 +828,9 @@ const Pubkey* spl_token_option_pubkey_get(const SplTokenOptionPubkey* option_pub
             return (const Pubkey*) &option_pubkey->some;
     }
     return NULL;
+}
+
+bool is_token2022_instruction(const Instruction* instruction, const MessageHeader* header) {
+    const Pubkey* program_id = &header->pubkeys[instruction->program_id_index];
+    return memcmp(program_id, &spl_token2022_program_id, PUBKEY_SIZE) == 0;
 }

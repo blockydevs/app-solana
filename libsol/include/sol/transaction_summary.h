@@ -20,6 +20,8 @@
 // If all _Required_ `SummaryItem`s have not been set, finalization will fail.
 
 #define NUM_GENERAL_ITEMS 11
+#define DEFAULT_COMPUTE_UNIT_LIMIT 200000
+#define COMPUTE_UNIT_PRICE_DIVIDER 1000000
 #define MAX_TRANSACTION_SUMMARY_ITEMS              \
     (1                       /* primary */         \
      + NUM_GENERAL_ITEMS + 1 /* nonce_account */   \

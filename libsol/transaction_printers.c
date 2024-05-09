@@ -563,10 +563,11 @@ static int print_spl_associated_token_account_create_with_transfer(const PrintCo
 
     const SplAssociatedTokenAccountCreateInfo* c_info =
         &infos[0]->spl_associated_token_account.create;
-    const SplTokenTransferInfo* t_info = &infos[1]->spl_token.transfer;
+    SplTokenInfo spl_token = infos[1]->spl_token;
+    const SplTokenTransferInfo* t_info = &spl_token.transfer;
 
     print_spl_associated_token_account_create_info(c_info, print_config);
-    print_spl_token_transfer_info(t_info, print_config, false);
+    print_spl_token_transfer_info(t_info, print_config, spl_token.is_token2022_kind, false);
 
     return 0;
 }
@@ -667,6 +668,16 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
     }
 
     return 1;
+}
+
+int print_spl_token_extension_warning(){
+
+    SummaryItem* item = transaction_summary_general_item();
+    summary_item_set_string(item, "Extension Warning", "Unsupported extensions found");
+    item = transaction_summary_general_item();
+    summary_item_set_string(item, "","Verify transaction before signing");
+
+    return 0;
 }
 
 int print_transaction(const PrintConfig* print_config,

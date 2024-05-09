@@ -100,6 +100,8 @@ typedef struct Token_COption_Pubkey {
 
 /**
  * Instructions supported by the token program.
+ * List is compliant with the program source code at:
+ * https://github.com/solana-labs/solana-program-library/blob/master/token/program-2022/src/instruction.rs
  */
 typedef enum Token_TokenInstruction_Tag {
     /**
@@ -439,6 +441,85 @@ typedef enum Token_TokenInstruction_Tag {
      *   0. `[writable]`  The native token account to sync with its underlying lamports.
      */
     Token_TokenInstruction_SyncNative,
+
+    /**
+     * The common instruction prefix for Transfer Fee extension instructions.
+     * See `extension::transfer_fee::instruction::TransferFeeInstruction` for
+     * further details about the extended instructions that share this
+     * instruction prefix
+     */
+    Token_TokenExtensionInstruction_TransferFeeExtension = 26,
+
+    /**
+     * The common instruction prefix for Confidential Transfer extension instructions.
+     * See `extension::confidential_transfer::instruction::ConfidentialTransferInstruction` for
+     * further details about the extended instructions that share this
+     * instruction prefix
+     */
+    Token_TokenExtensionInstruction_ConfidentialTransferExtension = 27,
+
+    /**
+     * The common instruction prefix for Default Account State extension instructions.
+     * See `extension::default_account_state::instruction::DefaultAccountStateInstruction` for
+     * further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_DefaultAccountStateExtension = 28,
+
+    /**
+     * The common instruction prefix for Memo Transfer account extension instructions.
+     * See `extension::memo_transfer::instruction::RequiredMemoTransfersInstruction` for
+     * further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_MemoTransferExtension = 30,
+
+    /**
+     * The common instruction prefix for Interest Bearing extension instructions.
+     * See `extension::interest_bearing_mint::instruction::InterestBearingMintInstruction` for
+     * further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_InterestBearingMintExtension = 33,
+
+    /**
+     * The common instruction prefix for CPI Guard account extension instructions.
+     * See `extension::cpi_guard::instruction::CpiGuardInstruction` for
+     * further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_CpiGuardExtension = 34,
+
+    /**
+     * The common instruction prefix for transfer hook extension instructions.
+     * See `extension::transfer_hook::instruction::TransferHookInstruction`
+     * for further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_TransferHookExtension = 36,
+
+    /**
+     * The common instruction prefix for the confidential transfer fee extension instructions.
+     * See `extension::confidential_transfer_fee::instruction::ConfidentialTransferFeeInstruction`
+     * for further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_ConfidentialTransferFeeExtension = 37,
+
+    /**
+     * The common instruction prefix for metadata pointer extension instructions.
+     * See `extension::metadata_pointer::instruction::MetadataPointerInstruction`
+     * for further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_MetadataPointerExtension = 39,
+
+    /**
+     * The common instruction prefix for group pointer extension instructions.
+     * See `extension::group_pointer::instruction::GroupPointerInstruction`
+     * for further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_GroupPointerExtension = 40,
+
+    /**
+     * The common instruction prefix for group member pointer extension instructions.
+     * See `extension::group_member_pointer::instruction::GroupMemberPointerInstruction`
+     * for further details about the extended instructions that share this instruction prefix
+     */
+    Token_TokenExtensionInstruction_GroupMemberPointerExtension = 41
 } Token_TokenInstruction_Tag;
 
 typedef struct Token_TokenInstruction_Token_InitializeMint_Body {

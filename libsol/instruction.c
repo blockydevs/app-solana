@@ -2,6 +2,7 @@
 #include "serum_assert_owner_instruction.h"
 #include "spl_memo_instruction.h"
 #include "spl_token_instruction.h"
+#include "spl_token2022_instruction.h"
 #include "compute_budget_instruction.h"
 #include "stake_instruction.h"
 #include "system_instruction.h"
@@ -18,6 +19,8 @@ enum ProgramId instruction_program_id(const Instruction* instruction, const Mess
         return ProgramIdVote;
     } else if (memcmp(program_id, &spl_token_program_id, PUBKEY_SIZE) == 0) {
         return ProgramIdSplToken;
+    } else if(memcmp(program_id, &spl_token2022_program_id, PUBKEY_SIZE) == 0) {
+        return ProgramIdSplToken;//Treat the Token2022 exactly the same as the SplToken
     } else if (memcmp(program_id, &spl_associated_token_account_program_id, PUBKEY_SIZE) == 0) {
         return ProgramIdSplAssociatedTokenAccount;
     } else if (is_serum_assert_owner_program_id(program_id)) {

@@ -26,6 +26,10 @@ int process_message_body(const uint8_t* message_body,
     InstructionInfo instruction_info[MAX_INSTRUCTIONS];
     explicit_bzero(instruction_info, sizeof(InstructionInfo) * MAX_INSTRUCTIONS);
 
+    //Track if given transaction contains token2022 extensions that are not fully supported
+    //Needed to display user proper warning
+    SplTokenExtensionsMetadata token_extensions_metadata = {false};
+
     size_t display_instruction_count = 0;
     InstructionInfo* display_instruction_info[MAX_INSTRUCTIONS];
 
@@ -36,6 +40,8 @@ int process_message_body(const uint8_t* message_body,
         BAIL_IF(instruction_validate(&instruction, header));
 
         InstructionInfo* info = &instruction_info[instruction_count];
+        bool ignore_instruction_info = false;
+
         enum ProgramId program_id = instruction_program_id(&instruction, header);
         switch (program_id) {
             case ProgramIdSerumAssertOwner: {
@@ -58,7 +64,12 @@ int process_message_body(const uint8_t* message_body,
                 break;
             }
             case ProgramIdSplToken:
-                if (parse_spl_token_instructions(&instruction, header, &info->spl_token) == 0) {
+                if (parse_spl_token_instructions(&instruction,
+                                                 header,
+                                                 &info->spl_token,
+                                                 &token_extensions_metadata,
+                                                 &ignore_instruction_info) == 0) {
+                    info->spl_token.is_token2022_kind = is_token2022_instruction(&instruction, header);
                     info->kind = program_id;
                 }
                 break;
@@ -88,6 +99,9 @@ int process_message_body(const uint8_t* message_body,
             }
             case ProgramIdUnknown:
                 break;
+        }
+        if(ignore_instruction_info){
+            continue;
         }
         switch (info->kind) {
             case ProgramIdSplAssociatedTokenAccount:
@@ -120,5 +134,8 @@ int process_message_body(const uint8_t* message_body,
         BAIL_IF(instruction_info[i].kind == ProgramIdUnknown);
     }
 
+    if (token_extensions_metadata.generate_extension_warning) {
+        BAIL_IF(print_spl_token_extension_warning());
+    }
     return print_transaction(print_config, display_instruction_info, display_instruction_count);
 }
