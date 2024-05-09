@@ -69,6 +69,7 @@ int process_message_body(const uint8_t* message_body,
                                                  &info->spl_token,
                                                  &token_extensions_metadata,
                                                  &ignore_instruction_info) == 0) {
+                    info->spl_token.is_token2022_kind = is_token2022_instruction(&instruction, header);
                     info->kind = program_id;
                 }
                 break;

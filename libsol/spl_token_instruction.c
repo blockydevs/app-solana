@@ -522,6 +522,7 @@ static int print_spl_token_initialize_multisig_info(const char* primary_title,
 
 int print_spl_token_transfer_info(const SplTokenTransferInfo* info,
                                   const PrintConfig* print_config,
+                                  bool is_token2022_kind,
                                   bool primary) {
     SummaryItem* item;
 
@@ -543,6 +544,14 @@ int print_spl_token_transfer_info(const SplTokenTransferInfo* info,
 
     item = transaction_summary_general_item();
     summary_item_set_pubkey(item, "To", info->dest_account);
+
+    if(is_token2022_kind){
+        item = transaction_summary_general_item();
+        summary_item_set_string(item, "Extension warning", "");
+
+        item = transaction_summary_general_item();
+        summary_item_set_string(item, "", "Can't check mint extensions - Check explorer");
+    }
 
     print_spl_token_sign(&info->sign, print_config);
 
@@ -751,7 +760,7 @@ int print_spl_token_info(const SplTokenInfo* info, const PrintConfig* print_conf
         case SplTokenKind(ThawAccount):
             return print_spl_token_thaw_account_info(&info->thaw_account, print_config);
         case SplTokenKind(TransferChecked):
-            return print_spl_token_transfer_info(&info->transfer, print_config, true);
+            return print_spl_token_transfer_info(&info->transfer, print_config, info->is_token2022_kind, true);
         case SplTokenKind(ApproveChecked):
             return print_spl_token_approve_info(&info->approve, print_config);
         case SplTokenKind(MintToChecked):
@@ -819,4 +828,9 @@ const Pubkey* spl_token_option_pubkey_get(const SplTokenOptionPubkey* option_pub
             return (const Pubkey*) &option_pubkey->some;
     }
     return NULL;
+}
+
+bool is_token2022_instruction(const Instruction* instruction, const MessageHeader* header) {
+    const Pubkey* program_id = &header->pubkeys[instruction->program_id_index];
+    return memcmp(program_id, &spl_token2022_program_id, PUBKEY_SIZE) == 0;
 }

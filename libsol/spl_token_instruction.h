@@ -119,6 +119,7 @@ typedef struct SplTokenSyncNativeInfo {
 
 typedef struct SplTokenInfo {
     SplTokenInstructionKind kind;
+    bool is_token2022_kind;
     union {
         SplTokenInitializeMintInfo initialize_mint;
         SplTokenInitializeAccountInfo initialize_account;
@@ -140,6 +141,8 @@ typedef struct SplTokenExtensionsMetadata{
     bool generate_extension_warning;
 } SplTokenExtensionsMetadata;
 
+bool is_token2022_instruction(const Instruction* instruction, const MessageHeader* header);
+
 int parse_spl_token_instructions(const Instruction* instruction,
                                  const MessageHeader* header,
                                  SplTokenInfo* info,
@@ -156,4 +159,5 @@ const Pubkey* spl_token_option_pubkey_get(const SplTokenOptionPubkey* option_pub
 
 int print_spl_token_transfer_info(const SplTokenTransferInfo* info,
                                   const PrintConfig* print_config,
+                                  bool is_token2022_kind,
                                   bool primary);
