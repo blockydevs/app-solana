@@ -652,12 +652,12 @@ static int print_transaction_nonce_processed(const PrintConfig* print_config,
                 // System allocate/assign have no interesting info, print
                 // stake split as if it were a single instruction
                 return print_stake_info(&infos[2]->stake, print_config);
-            } else if(is_stake_split_with_seed_v1_3(infos, infos_length)) {
+            } else if (is_stake_split_with_seed_v1_3(infos, infos_length)) {
                 return print_prefunded_split_with_seed(print_config, infos, infos_length);
             }
             break;
         case 4:
-            if(is_stake_split_v1_3(infos, infos_length)) {
+            if (is_stake_split_v1_3(infos, infos_length)) {
                 return print_prefunded_split(print_config, infos, infos_length);
             }
             break;
@@ -683,8 +683,9 @@ int print_transaction(const PrintConfig* print_config,
 
     if (infos_length > 1) {
         // Iterate over infos and print compute budget instructions and offset pointers
-        // Handle ComputeBudget instructions first due to tech limitations of the print_transaction_nonce_processed.
-        // We can get one or 4 ComputeBudget instructions in a single transaction, so we are not able to handle it in a static switch case.
+        // Handle ComputeBudget instructions first due to tech limitations of the
+        // print_transaction_nonce_processed. We can get one or 4 ComputeBudget instructions in a
+        // single transaction, so we are not able to handle it in a static switch case.
         size_t infos_length_initial = infos_length;
         for (size_t info_idx = 0; info_idx < infos_length_initial; ++info_idx) {
             InstructionInfo* instruction_info = infos[0];

@@ -38,13 +38,16 @@ static int parse_unit_price_instruction(Parser* parse, ComputeBudgetChangeUnitPr
     return 0;
 }
 
-static int parse_loaded_accounts_data_size_limit(Parser* parse, ComputeBudgetSetLoadedAccountsDataSizeLimitInfo* info) {
+static int parse_loaded_accounts_data_size_limit(
+    Parser* parse,
+    ComputeBudgetSetLoadedAccountsDataSizeLimitInfo* info) {
     BAIL_IF(parse_u32(parse, &info->units));
 
     return 0;
 }
 
-static int print_compute_budget_unit_price(ComputeBudgetChangeUnitPriceInfo* info, const PrintConfig* print_config) {
+static int print_compute_budget_unit_price(ComputeBudgetChangeUnitPriceInfo* info,
+                                           const PrintConfig* print_config) {
     UNUSED(print_config);
 
     SummaryItem* item;
@@ -55,7 +58,8 @@ static int print_compute_budget_unit_price(ComputeBudgetChangeUnitPriceInfo* inf
     return 0;
 }
 
-static int print_compute_budget_unit_limit(ComputeBudgetChangeUnitLimitInfo* info, const PrintConfig* print_config) {
+static int print_compute_budget_unit_limit(ComputeBudgetChangeUnitLimitInfo* info,
+                                           const PrintConfig* print_config) {
     UNUSED(print_config);
 
     SummaryItem* item;
@@ -92,7 +96,9 @@ int parse_compute_budget_instructions(const Instruction* instruction, ComputeBud
         case ComputeBudgetChangeUnitPrice:
             return parse_unit_price_instruction(&parser, &info->change_unit_price);
         case ComputeBudgetSetLoadedAccountsDataSizeLimit:
-            return parse_loaded_accounts_data_size_limit(&parser, &info->set_loaded_accounts_data_size_limit);
+            return parse_loaded_accounts_data_size_limit(
+                &parser,
+                &info->set_loaded_accounts_data_size_limit);
         default:
             return 1;
     }

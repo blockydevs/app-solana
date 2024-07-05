@@ -26,7 +26,7 @@ typedef struct ComputeBudgetChangeUnitPriceInfo {
     uint64_t units;
 } ComputeBudgetChangeUnitPriceInfo;
 
-typedef struct ComputeBudgetSetLoadedAccountsDataSizeLimitInfo{
+typedef struct ComputeBudgetSetLoadedAccountsDataSizeLimitInfo {
     uint32_t units;
 } ComputeBudgetSetLoadedAccountsDataSizeLimitInfo;
 
