@@ -112,5 +112,4 @@ void start_sign_offchain_message_ui(bool is_ascii, size_t num_summary_steps) {
 
     ux_flow_init(0, flow_steps, NULL);
 }
-
 #endif
