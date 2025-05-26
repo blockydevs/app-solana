@@ -7,6 +7,7 @@
 struct SummaryItem {
     const char *title;
     enum SummaryItemKind kind;
+
     union {
         uint64_t u64;
         int64_t i64;
@@ -15,6 +16,7 @@ struct SummaryItem {
         const char *string;
         SizedString sized_string;
         TokenAmount token_amount;
+        const OffchainMessageApplicationDomain *application_domain;
     };
 };
 
@@ -79,7 +81,19 @@ void summary_item_set_timestamp(SummaryItem *item, const char *title, int64_t va
     item->i64 = value;
 }
 
+void summary_item_set_offchain_message_application_domain(
+    SummaryItem *item,
+    const char *title,
+    const OffchainMessageApplicationDomain *value) {
+    item->kind = SummaryItemOffchainMessageApplicationDomain;
+    item->title = title;
+    item->application_domain = value;
+}
+
 typedef struct TransactionSummary {
+    bool is_token_2022_transfer;
+    bool fee_warning;
+    bool hook_warning;
     SummaryItem primary;
     SummaryItem fee_payer;
     SummaryItem nonce_account;
@@ -139,7 +153,37 @@ SummaryItem *transaction_summary_general_item() {
     return NULL;
 }
 
+void transaction_summary_set_token_fee_warning(bool fee_warning) {
+    G_transaction_summary.fee_warning = fee_warning;
+}
+
+void transaction_summary_set_token_hook_warning(bool hook_warning) {
+    G_transaction_summary.hook_warning = hook_warning;
+}
+
+void transaction_summary_get_token_warnings(bool *fee_warning, bool *hook_warning) {
+    *fee_warning = G_transaction_summary.fee_warning;
+    *hook_warning = G_transaction_summary.hook_warning;
+}
+
+void transaction_summary_set_is_token_2022_transfer(bool is_token_2022_transfer) {
+    G_transaction_summary.is_token_2022_transfer = is_token_2022_transfer;
+}
+
+void transaction_summary_get_is_token_2022_transfer(bool *is_token_2022_transfer) {
+    *is_token_2022_transfer = G_transaction_summary.is_token_2022_transfer;
+}
+
 #define FEE_PAYER_TITLE "Fee payer"
+
+SummaryItem *transaction_summary_primary_or_general_item() {
+    SummaryItem *item = transaction_summary_primary_item();
+    if (item != NULL) {
+        return item;
+    }
+    return transaction_summary_general_item();
+}
+
 int transaction_summary_set_fee_payer_pubkey(const Pubkey *pubkey) {
     SummaryItem *item = transaction_summary_fee_payer_item();
     BAIL_IF(item == NULL);
@@ -196,6 +240,12 @@ static int transaction_summary_update_display_for_item(const SummaryItem *item,
             break;
         case SummaryItemTimestamp:
             BAIL_IF(print_timestamp(item->i64, G_transaction_summary_text, TEXT_BUFFER_LENGTH));
+            break;
+        case SummaryItemOffchainMessageApplicationDomain:
+            BAIL_IF(encode_base58(item->application_domain,
+                                  OFFCHAIN_MESSAGE_APPLICATION_DOMAIN_LENGTH,
+                                  G_transaction_summary_text,
+                                  TEXT_BUFFER_LENGTH));
             break;
     }
     print_string(item->title, G_transaction_summary_title, TITLE_SIZE);

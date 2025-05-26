@@ -2,6 +2,7 @@
 #include "cx.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include "base58.h"
 
 #include "lib_standard_app/crypto_helpers.h"
 
@@ -33,6 +34,20 @@ void get_public_key(uint8_t publicKeyArray[static PUBKEY_LENGTH],
     if ((rawPubkey[PUBKEY_LENGTH] & 1) != 0) {
         publicKeyArray[PUBKEY_LENGTH - 1] |= 0x80;
     }
+}
+
+int get_pubkey_index(const Pubkey *needle,
+                     const Pubkey *haystack,
+                     size_t haystack_len,
+                     size_t *index) {
+    for (size_t i = 0; i < haystack_len; ++i) {
+        const Pubkey *current_pubkey = &(haystack[i]);
+        if (memcmp(current_pubkey, needle, PUBKEY_SIZE) == 0) {
+            *index = i;
+            return 0;
+        }
+    }
+    return -1;
 }
 
 int read_derivation_path(const uint8_t *data_buffer,
@@ -86,4 +101,38 @@ uint8_t set_result_sign_message(void) {
     }
 
     return SIGNATURE_LENGTH;
+}
+
+int copy_and_decode_pubkey(const buffer_t in_encoded_address,
+                           char *out_encoded_address,
+                           uint8_t *decoded_address) {
+    int res;
+
+    // Should be caught at parsing but let's double check
+    if (in_encoded_address.size >= BASE58_PUBKEY_LENGTH) {
+        PRINTF("Input address size exceeds buffer length\n");
+        return -1;
+    }
+
+    // Should be caught at parsing but let's double check
+    if (in_encoded_address.size == 0) {
+        PRINTF("Input address size is 0\n");
+        return -1;
+    }
+
+    // Save the encoded address
+    memset(out_encoded_address, 0, BASE58_PUBKEY_LENGTH);
+    memcpy(out_encoded_address, in_encoded_address.ptr, in_encoded_address.size);
+
+    // Decode and save the decoded address
+    res = base58_decode(out_encoded_address,
+                        strlen(out_encoded_address),
+                        decoded_address,
+                        PUBKEY_LENGTH);
+    if (res != PUBKEY_LENGTH) {
+        PRINTF("base58_decode error, %d != PUBKEY_LENGTH %d\n", res, PUBKEY_LENGTH);
+        return -1;
+    }
+
+    return 0;
 }

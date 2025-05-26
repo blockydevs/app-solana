@@ -19,7 +19,9 @@
 //
 // If all _Required_ `SummaryItem`s have not been set, finalization will fail.
 
-#define NUM_GENERAL_ITEMS 11
+#define NUM_GENERAL_ITEMS          11
+#define DEFAULT_COMPUTE_UNIT_LIMIT 200000
+#define COMPUTE_UNIT_PRICE_DIVIDER 1000000
 #define MAX_TRANSACTION_SUMMARY_ITEMS              \
     (1                       /* primary */         \
      + NUM_GENERAL_ITEMS + 1 /* nonce_account */   \
@@ -44,6 +46,7 @@ enum SummaryItemKind {
     SummaryItemSizedString,
     SummaryItemString,
     SummaryItemTimestamp,
+    SummaryItemOffchainMessageApplicationDomain,
 };
 typedef enum SummaryItemKind SummaryItemKind_t;
 
@@ -51,6 +54,7 @@ typedef struct SummaryItem SummaryItem;
 
 extern char G_transaction_summary_title[TITLE_SIZE];
 #define TEXT_BUFFER_LENGTH BASE58_PUBKEY_LENGTH
+
 extern char G_transaction_summary_text[TEXT_BUFFER_LENGTH];
 
 void transaction_summary_reset();
@@ -68,6 +72,7 @@ SummaryItem *transaction_summary_fee_payer_item();
 SummaryItem *transaction_summary_nonce_account_item();
 SummaryItem *transaction_summary_nonce_authority_item();
 SummaryItem *transaction_summary_general_item();
+SummaryItem *transaction_summary_primary_or_general_item();
 
 int transaction_summary_set_fee_payer_pubkey(const Pubkey *pubkey);
 
@@ -85,3 +90,12 @@ void summary_item_set_hash(SummaryItem *item, const char *title, const Hash *val
 void summary_item_set_sized_string(SummaryItem *item, const char *title, const SizedString *value);
 void summary_item_set_string(SummaryItem *item, const char *title, const char *value);
 void summary_item_set_timestamp(SummaryItem *item, const char *title, int64_t value);
+void transaction_summary_set_token_fee_warning(bool fee_warning);
+void transaction_summary_set_token_hook_warning(bool hook_warning);
+void transaction_summary_get_token_warnings(bool *fee_warning, bool *hook_warning);
+void transaction_summary_set_is_token_2022_transfer(bool is_token_2022_transfer);
+void transaction_summary_get_is_token_2022_transfer(bool *is_token_2022_transfer);
+void summary_item_set_offchain_message_application_domain(
+    SummaryItem *item,
+    const char *title,
+    const OffchainMessageApplicationDomain *value);
