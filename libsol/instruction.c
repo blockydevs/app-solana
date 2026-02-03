@@ -12,6 +12,7 @@
 
 enum ProgramId instruction_program_id(const Instruction *instruction, const MessageHeader *header) {
     const Pubkey *program_id = &header->pubkeys[instruction->program_id_index];
+    PRINTF("program_id = %.*H\n", PUBKEY_SIZE, program_id);
     if (memcmp(program_id, &system_program_id, PUBKEY_SIZE) == 0) {
         PRINTF("ProgramIdSystem\n");
         return ProgramIdSystem;
@@ -41,6 +42,7 @@ enum ProgramId instruction_program_id(const Instruction *instruction, const Mess
         return ProgramIdComputeBudget;
     }
 
+    PRINTF("ProgramIdUnknown\n");
     return ProgramIdUnknown;
 }
 
@@ -123,4 +125,23 @@ size_t instruction_accounts_iterator_remaining(const InstructionAccountsIterator
         return it->instruction_accounts_length - it->current_instruction_account;
     }
     return 0;
+}
+
+// Instructions do not store the accounts they use, they only store the index of the accounts in
+// the header account array. This function resolves the indirection
+const uint8_t *get_account_from_ins(const Instruction *instruction,
+                                    const MessageHeader *header,
+                                    uint8_t account_index) {
+    if (account_index >= instruction->accounts_length) {
+        PRINTF("Error account_index %d while instruction accounts_length %d\n",
+               account_index,
+               instruction->accounts_length);
+        return NULL;
+    }
+    PRINTF("account_index %d = pubkey %d = %.*H\n",
+           account_index,
+           instruction->accounts[account_index],
+           PUBKEY_SIZE,
+           header->pubkeys[instruction->accounts[account_index]].data);
+    return header->pubkeys[instruction->accounts[account_index]].data;
 }

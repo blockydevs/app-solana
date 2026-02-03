@@ -7,9 +7,12 @@
 #include "sol/printer.h"
 #include "swap_common.h"
 #include "util.h"
+#include "base58.h"
 
 typedef struct swap_validated_s {
     bool initialized;
+    swap_mode_t swap_mode;
+    uint64_t template_id;
     uint8_t decimals;
     char ticker[MAX_SWAP_TOKEN_LENGTH];
     uint64_t amount;
@@ -23,21 +26,37 @@ static swap_validated_t G_swap_validated;
 static uint8_t *G_swap_sign_return_value_address;
 
 // Save the data validated during the Exchange app flow
-bool copy_transaction_parameters(create_transaction_parameters_t *params) {
-    // Ensure no extraid
-    if (params->destination_address_extra_id == NULL) {
-        PRINTF("destination_address_extra_id expected\n");
-        return false;
-    } else if (params->destination_address_extra_id[0] != '\0') {
-        PRINTF("destination_address_extra_id expected empty, not '%s'\n",
-               params->destination_address_extra_id);
-        return false;
-    }
-
+bool swap_copy_transaction_parameters(create_transaction_parameters_t *params) {
     // first copy parameters to stack, and then to global data.
     // We need this "trick" as the input data position can overlap with app globals
     swap_validated_t swap_validated;
     memset(&swap_validated, 0, sizeof(swap_validated));
+
+    // if destination_address_extra_id is given, we use the first byte to determine if we use the
+    // normal swap protocol, or the one for cross-chain swaps (LiFi template)
+    if (params->destination_address_extra_id != NULL) {
+        switch (params->destination_address_extra_id[0]) {
+            case EXTRA_ID_TYPE_NATIVE:
+                swap_validated.swap_mode = SWAP_MODE_STANDARD;
+                PRINTF("Standard swap\n");
+                break;
+            case EXTRA_ID_TYPE_SOLANA_TEMPLATE:
+                swap_validated.swap_mode = SWAP_MODE_CROSSCHAIN;
+                // Read 8 bytes as big endian uint64_t
+                swap_validated.template_id = U8BE(
+                    (uint8_t *) params->destination_address_extra_id + 1,
+                    0);
+                PRINTF("Crosschain swap with template_id: %.*H\n",
+                       TEMPLATE_ID_SIZE,
+                       (uint8_t *) &swap_validated.template_id);
+                break;
+            default:
+                PRINTF("Invalid or unknown swap protocol\n");
+                swap_validated.swap_mode = SWAP_MODE_ERROR;
+        }
+    } else {
+        swap_validated.swap_mode = SWAP_MODE_STANDARD;
+    }
 
     // Parse config and save decimals and ticker
     // If there is no coin_configuration, consider that we are doing a SOL swap
@@ -113,7 +132,45 @@ bool check_swap_amount(const char *text) {
     }
 }
 
-bool is_valid_char(char c) {
+bool check_swap_amount_raw(uint64_t amount) {
+    if (!G_swap_validated.initialized) {
+        PRINTF("check_swap_ticker internal error\n");
+        return false;
+    }
+
+    debug_print_u64("Received amount", amount);
+    debug_print_u64("Validated G_swap_validated.amount", G_swap_validated.amount);
+    if (amount != G_swap_validated.amount) {
+        PRINTF("Amount mismatch\n");
+        return false;
+    }
+
+    PRINTF("Amount validated\n");
+    return true;
+}
+
+bool check_swap_ticker(const char *ticker) {
+    if (ticker == NULL || !G_swap_validated.initialized) {
+        PRINTF("check_swap_ticker internal error\n");
+        return false;
+    }
+
+    if (strncmp(ticker, G_swap_validated.ticker, MAX_SWAP_TOKEN_LENGTH) != 0) {
+        PRINTF("Ticker mismatch: received %s, validated %s\n", ticker, G_swap_validated.ticker);
+        return false;
+    }
+    return true;
+}
+
+const char *get_swap_ticker() {
+    if (!G_swap_validated.initialized) {
+        PRINTF("check_swap_ticker internal error\n");
+        return NULL;
+    }
+    return G_swap_validated.ticker;
+}
+
+static bool is_valid_char(char c) {
     return (c == '.' || (c >= '0' && c <= '9'));
 }
 
@@ -185,16 +242,39 @@ bool check_swap_fee(const char *text) {
 // Check that the recipient in parameter is the same as the previously saved recipient
 bool check_swap_recipient(const char *text) {
     if (!G_swap_validated.initialized) {
+        PRINTF("Error check_swap_recipient !G_swap_validated.initialized\n");
         return false;
     }
+
+    PRINTF("Recipient requested in this transaction = %s\n", text);
+    PRINTF("Recipient validated in swap = %s\n", G_swap_validated.recipient);
 
     if (strcmp(G_swap_validated.recipient, text) == 0) {
         return true;
     } else {
-        PRINTF("Recipient requested in this transaction = %s\n", text);
-        PRINTF("Recipient validated in swap = %s\n", G_swap_validated.recipient);
+        PRINTF("Error check_swap_recipient mismatch\n");
         return false;
     }
+}
+
+// Check that the recipient in parameter is the same as the previously saved recipient
+int get_swap_recipient(uint8_t recipient_address[PUBKEY_SIZE]) {
+    if (!G_swap_validated.initialized) {
+        PRINTF("Error get_swap_recipient !G_swap_validated.initialized\n");
+        return -1;
+    }
+    PRINTF("G_swap_validated.recipient = %s\n", G_swap_validated.recipient);
+    explicit_bzero(recipient_address, PUBKEY_SIZE);
+    int res = base58_decode(G_swap_validated.recipient,
+                            strlen(G_swap_validated.recipient),
+                            recipient_address,
+                            PUBKEY_SIZE);
+    if (res != PUBKEY_SIZE) {
+        PRINTF("base58_decode error, %d != PUBKEY_SIZE %d\n", res, PUBKEY_SIZE);
+        return -1;
+    }
+
+    return 0;
 }
 
 void __attribute__((noreturn)) finalize_exchange_sign_transaction(bool is_success) {
@@ -204,4 +284,24 @@ void __attribute__((noreturn)) finalize_exchange_sign_transaction(bool is_succes
 
 bool is_token_transaction() {
     return (memcmp(G_swap_validated.ticker, "SOL", sizeof("SOL")) != 0);
+}
+
+swap_mode_t get_swap_mode(void) {
+    return G_swap_validated.swap_mode;
+}
+
+bool check_template_id(uint64_t template_id) {
+    if (!G_swap_validated.initialized) {
+        PRINTF("check_template_id: swap not initialized\n");
+        return false;
+    }
+
+    if (G_swap_validated.template_id != template_id) {
+        PRINTF("check_template_id: mismatch - expected %llu, got %llu\n",
+               G_swap_validated.template_id,
+               template_id);
+        return false;
+    }
+
+    return true;
 }

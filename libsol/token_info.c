@@ -1,5 +1,7 @@
+#include "os.h"
 #include "token_info.h"
 #include "util.h"
+#include "macros.h"
 
 const TokenInfo TOKEN_REGISTRY[] = {
     // So11111111111111111111111111111111111111112
@@ -804,15 +806,49 @@ const TokenInfo TOKEN_REGISTRY[] = {
     {{{0xd6, 0xf9, 0x38, 0x36, 0x67, 0x9c, 0xa3, 0x2a, 0xe3, 0xfb, 0x0d,
        0x47, 0x3b, 0x75, 0xfa, 0xdf, 0x4b, 0x1f, 0x6c, 0xe4, 0x0d, 0x3e,
        0x85, 0xf9, 0x16, 0xeb, 0x0b, 0x1d, 0xfa, 0xb9, 0x58, 0x9e}},
-     "MELANIA"}};
+     "MELANIA"},
+
+    // ZBCNpuD7YMXzTHB2fhGkGi78MNsHGLRXUhRewNRm9RU
+    {{{0x08, 0x3e, 0x1d, 0x5d, 0x64, 0xb0, 0xeb, 0x30, 0xfa, 0x1e, 0x8e,
+       0x03, 0xe9, 0xf2, 0x46, 0x3f, 0xe2, 0xd8, 0x28, 0x88, 0x84, 0x6a,
+       0xed, 0x91, 0x54, 0x06, 0x98, 0xb2, 0xfe, 0xe1, 0x07, 0x2b}},
+     "ZBCN"}};
 
 const char *get_hardcoded_token_symbol(const uint8_t *mint_address) {
+    if (mint_address == NULL) {
+        PRINTF("get_hardcoded_token_symbol received NULL mint_address\n");
+        return NULL;
+    }
+
     for (size_t i = 0; i < ARRAY_LEN(TOKEN_REGISTRY); i++) {
         const TokenInfo *info = &TOKEN_REGISTRY[i];
 
         if (memcmp(&(info->mint_address), mint_address, PUBKEY_SIZE) == 0) {
+            PRINTF("symbol %s, for mint_address %.*H\n", info->symbol, PUBKEY_SIZE, mint_address);
             return info->symbol;
         }
     }
+    PRINTF("get_hardcoded_token_symbol could not find symbol for mint %.*H\n",
+           PUBKEY_SIZE,
+           mint_address);
     return "???";
+}
+
+const uint8_t *get_hardcoded_token_mint_address(const char *ticker, bool *is_token_2022_kind) {
+    if (ticker == NULL || is_token_2022_kind == NULL) {
+        PRINTF("get_hardcoded_token_mint_address received NULL parameter\n");
+        return NULL;
+    }
+
+    // No 2022 tokens are hardcoded in the application and will ever be
+    *is_token_2022_kind = false;
+
+    for (size_t i = 0; i < ARRAY_LENGTH(TOKEN_REGISTRY); i++) {
+        if (strcmp(ticker, TOKEN_REGISTRY[i].symbol) == 0) {
+            return TOKEN_REGISTRY[i].mint_address.data;
+        }
+    }
+
+    PRINTF("get_hardcoded_token_mint_address could not find ticker: %s\n", ticker);
+    return NULL;
 }
