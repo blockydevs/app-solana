@@ -4,7 +4,7 @@
 
 ## Overview
 
-This app adds support for the Solana native token to Ledger Nano S hardware wallet.
+This app adds support for the Solana native token to Ledger Nano S Plus (NanoSP) hardware wallet.
 
 Current Features:
 - Pubkey queries
@@ -28,9 +28,9 @@ $ docker pull ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools:latest
 Build the app in the container. The BOLOS_SDK variable is used to specify the target SDK, allowing to compile the application for each Ledger device. See [Ledger Application Builder](https://github.com/LedgerHQ/ledger-app-builder?tab=readme-ov-file#compile-your-app-in-the-container) for more details.
 
 ```sh
-# E.g. for Nano S
+# E.g. for NanoSP
 $ sudo docker run --rm -ti -v "$(realpath .):/app" --user $(id -u $USER):$(id -g $USER) ghcr.io/ledgerhq/ledger-app-builder//ledger-app-dev-tools:latest
-bash$ BOLOS_SDK=$NANOS_SDK make
+bash$ BOLOS_SDK=$NANOSP_SDK make
 ```
 
 ### Clean
@@ -38,7 +38,7 @@ bash$ BOLOS_SDK=$NANOS_SDK make
 Within the running development container
 
 ```sh
-bash$ BOLOS_SDK=$NANOS_SDK make clean
+bash$ BOLOS_SDK=$NANOSP_SDK make clean
 ```
 
 ## Working with the device
@@ -49,7 +49,7 @@ See [Ledger Application Builder](https://github.com/LedgerHQ/ledger-app-builder?
 
 ```bash
 $ sudo docker run --rm -ti  -v "$(realpath .):/app" --privileged -v "/dev/bus/usb:/dev/bus/usb" --user $(id -u $USER):$(id -g $USER) ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools:latest
-bash$ BOLOS_SDK=$NANOS_SDK make load
+bash$ BOLOS_SDK=$NANOSP_SDK make load
 ```
 
 ### Delete
@@ -57,7 +57,7 @@ bash$ BOLOS_SDK=$NANOS_SDK make load
 Within the running development container
 
 ```sh
-bash$ BOLOS_SDK=$NANOS_SDK make delete
+bash$ BOLOS_SDK=$NANOSP_SDK make delete
 ```
 
 ## Test
@@ -80,8 +80,8 @@ Run Ragger tests:
 # Install python test suite dependencies
 bash$ pip install -r "tests/python/requirements.txt"
 
-# Run test suite for the specific device, e.g. nanos
-bash$ pytest tests/python/ --tb=short -v --device nanos -k ""
+# Run test suite for the specific device, e.g. nanosp
+bash$ pytest tests/python/ --tb=short -v --device nanosp -k ""
 ```
 
 To regenerate golden snapshots, use `--golden_run` option.
