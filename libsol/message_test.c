@@ -195,6 +195,48 @@ void test_process_message_body_transfer_with_compute_budget_limit_and_unit_price
 
 }
 
+/**
+ * Transfer 6 lamports with compute budget request heap frame instruction
+ */
+ void test_process_message_body_transfer_with_compute_budget_request_heap_frame() {
+
+    uint8_t message[] = {
+        2, 0, 2,
+        5, 21, 114, 229, 47, 44, 94, 126, 102, 188, 25, 172, 108, 211, 11, 109, 105, 110, 167, 153, 207, 230, 215, 132, 84, 42, 183, 216, 183, 254, 49, 91, 92, 151, 92, 21, 68, 212, 0, 50, 152, 29, 184, 10, 237, 93, 26, 195, 28, 41, 242, 83, 160, 179, 163, 125, 22, 218, 2, 189, 250, 180, 15, 129, 237, 121, 159, 134, 35, 112, 111, 25, 35, 23, 57, 215, 23, 85, 213, 131, 83, 179, 66, 3, 70, 50, 124, 61, 59, 195, 97, 48, 196, 191, 215, 90, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        3, 6, 70, 111, 229, 33, 23, 50, 255, 236, 173, 186, 114, 195, 155, 231, 188, 140, 229, 187, 197, 247, 18, 107, 44, 67, 155, 58, 64, 0, 0, 0, 218, 136, 223, 51, 158, 165, 31, 125, 51, 95, 141, 189, 233, 28, 179, 134, 163, 220, 32, 253, 196, 249, 160, 163, 50, 179, 54, 211, 231, 31, 42, 94, 2,
+        //compute budget - request heap frame
+        4, 0, 5, 1,
+        205, 171, 0, 0, // bytes
+        //system - transfer
+        3, 2, 1, 2, 12, 2, 0, 0, 0,
+        6, // Transfer 6 lamports
+        0, 0, 0, 0, 0, 0, 0
+    };
+
+    process_message_body_and_sanity_check(message, sizeof(message), 4);
+}
+
+/**
+ * Transfer 6 lamports with compute budget set loaded accounts data size limit
+ */
+void test_process_message_body_transfer_with_compute_budget_loaded_accounts_data_size_limit() {
+
+    uint8_t message[] = {
+        2, 0, 2,
+        5, 21, 114, 229, 47, 44, 94, 126, 102, 188, 25, 172, 108, 211, 11, 109, 105, 110, 167, 153, 207, 230, 215, 132, 84, 42, 183, 216, 183, 254, 49, 91, 92, 151, 92, 21, 68, 212, 0, 50, 152, 29, 184, 10, 237, 93, 26, 195, 28, 41, 242, 83, 160, 179, 163, 125, 22, 218, 2, 189, 250, 180, 15, 129, 237, 121, 159, 134, 35, 112, 111, 25, 35, 23, 57, 215, 23, 85, 213, 131, 83, 179, 66, 3, 70, 50, 124, 61, 59, 195, 97, 48, 196, 191, 215, 90, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        3, 6, 70, 111, 229, 33, 23, 50, 255, 236, 173, 186, 114, 195, 155, 231, 188, 140, 229, 187, 197, 247, 18, 107, 44, 67, 155, 58, 64, 0, 0, 0, 218, 136, 223, 51, 158, 165, 31, 125, 51, 95, 141, 189, 233, 28, 179, 134, 163, 220, 32, 253, 196, 249, 160, 163, 50, 179, 54, 211, 231, 31, 42, 94, 2,
+        //compute budget - set loaded accounts data size limit
+        4, 0, 5, 4,
+        205, 171, 0, 0, // bytes
+        //system - transfer
+        3, 2, 1, 2, 12, 2, 0, 0, 0,
+        6, // Transfer 6 lamports
+        0, 0, 0, 0, 0, 0, 0
+    };
+
+    process_message_body_and_sanity_check(message, sizeof(message), 4);
+}
+
 /*
  * Transfer 5 lamports with additional request units instruction
  * Should fail - RequestUnits is deprecated and not supported
@@ -2031,6 +2073,9 @@ int main() {
     RUN_TEST(test_process_message_body_stake_merge);
     RUN_TEST(test_process_message_body_transfer_with_compute_budget_limit);
     RUN_TEST(test_process_message_body_transfer_with_compute_budget_limit_and_unit_price);
+    RUN_TEST(test_process_message_body_transfer_with_compute_budget_request_heap_frame);
+    RUN_TEST(
+        test_process_message_body_transfer_with_compute_budget_loaded_accounts_data_size_limit);
     RUN_TEST(test_process_message_body_transfer_with_request_units);
     RUN_TEST(test_process_message_body_transfer_with_heap_frame);
 

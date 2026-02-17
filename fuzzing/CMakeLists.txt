@@ -39,8 +39,14 @@ add_library(sol
     ${LIBSOL_DIR}/transaction_printers.c
     ${LIBSOL_DIR}/vote_instruction.c
     ${LIBSOL_DIR}/compute_budget_instruction.c
+    ${CMAKE_CURRENT_LIST_DIR}/mock/base58.c
+    ${LIBSOL_DIR}/offchain_message_signing.c
+    ${LIBSOL_DIR}/spl_token2022_instruction.c
+    ${LIBSOL_DIR}/mock/handle_provide_instruction_descriptor.c
+    ${LIBSOL_DIR}/mock/trusted_info.c
+    ${LIBSOL_DIR}/mock/dynamic_token_info.c
 )
-target_include_directories(sol PUBLIC ${LIBSOL_DIR}/include)
+target_include_directories(sol PUBLIC ${LIBSOL_DIR}/include ${LIBSOL_DIR}/mock)
 
 add_executable(fuzz_message fuzz_message.c)
 
