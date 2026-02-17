@@ -348,9 +348,6 @@ void handle_sign_message_parse_message(volatile unsigned int *flags, volatile un
 
     if (G_command.non_confirm) {
         PRINTF("G_command.non_confirm refused\n");
-        // Uncomment this to allow unattended signing.
-        //*tx = set_result_sign_message();
-        // THROW(ApduReplySuccess);
         UNUSED(tx);
         THROW(ApduReplySdkNotSupported);
     }

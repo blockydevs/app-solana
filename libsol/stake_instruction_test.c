@@ -110,6 +110,59 @@ void test_parse_stake_initialize_instruction() {
     assert(parse_stake_instructions(&instruction, &header, &info) == 0);
 }
 
+void test_parse_stake_split_instruction() {
+#define ACCOUNT_PUBKEY_BYTES   BYTES32_BS58_2
+#define SPLIT_PUBKEY_BYTES     BYTES32_BS58_3
+#define AUTHORITY_PUBKEY_BYTES BYTES32_BS58_4
+    Pubkey pubkeys[4] = {
+        {{ACCOUNT_PUBKEY_BYTES}},
+        {{SPLIT_PUBKEY_BYTES}},
+        {{AUTHORITY_PUBKEY_BYTES}},
+    };
+    memcpy(&pubkeys[3], &stake_program_id, PUBKEY_SIZE);
+    Blockhash blockhash = {{BYTES32_BS58_5}};
+    MessageHeader header = {false, 0, {1, 0, 1, ARRAY_LEN(pubkeys)}, pubkeys, &blockhash, 1};
+    uint8_t accounts[] = {0, 1, 2};
+    uint8_t ix_data[] = {
+        0x03,
+        0x00,
+        0x00,
+        0x00,  // StakeSplit
+        0x2a,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00  // 42 lamports
+    };
+    Instruction instruction = {
+        3,
+        accounts,
+        3,
+        ix_data,
+        sizeof(ix_data),
+    };
+
+    Parser parser = {ix_data + sizeof(uint32_t), sizeof(ix_data) - sizeof(uint32_t)};
+    StakeSplitInfo split_info;
+    assert(parse_stake_split_instruction(&parser, &instruction, &header, &split_info) == 0);
+
+    Pubkey account = {{ACCOUNT_PUBKEY_BYTES}};
+    Pubkey split_account = {{SPLIT_PUBKEY_BYTES}};
+    Pubkey authority = {{AUTHORITY_PUBKEY_BYTES}};
+    assert(memcmp(&account, split_info.account, PUBKEY_SIZE) == 0);
+    assert(memcmp(&split_account, split_info.split_account, PUBKEY_SIZE) == 0);
+    assert(memcmp(&authority, split_info.authority, PUBKEY_SIZE) == 0);
+    assert(split_info.lamports == 42);
+
+    StakeInfo info;
+    assert(parse_stake_instructions(&instruction, &header, &info) == 0);
+    assert(info.kind == StakeSplit);
+    assert(info.split.lamports == 42);
+}
+
 void test_parse_stake_instruction_kind() {
     enum StakeInstructionKind kind;
     uint8_t buf[] = {0, 0, 0, 0};
@@ -394,6 +447,7 @@ int main() {
     RUN_TEST(test_parse_stake_instruction_kind);
     RUN_TEST(test_parse_stake_authorize_enum);
     RUN_TEST(test_parse_stake_lockup_args);
+    RUN_TEST(test_parse_stake_split_instruction);
 
     printf("passed\n");
     return 0;

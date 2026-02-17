@@ -87,7 +87,6 @@ static nbgl_contentTagValue_t *get_single_action_long_review_pair(uint8_t index)
 
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
-    // validate_transaction(confirm);
     nbgl_reviewStatusType_t status_type;
     if (confirm) {
         sendResponse(set_result_sign_message(), ApduReplySuccess, false);

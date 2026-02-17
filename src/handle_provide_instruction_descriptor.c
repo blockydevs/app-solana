@@ -242,8 +242,6 @@ static bool handle_common(const tlv_data_t *data, tlv_out_t *out) {
 
 // Wrapper around handle_provide_trusted_info_internal to handle the challenge reroll
 static int handle_provide_instruction_descriptor_internal(void) {
-    // explicit_bzero(&g_dynamic_token_info, sizeof(g_dynamic_token_info));
-
     tlv_out_t tlv_extracted = {0};
     cx_sha256_init(&tlv_extracted.hash_ctx);
 
